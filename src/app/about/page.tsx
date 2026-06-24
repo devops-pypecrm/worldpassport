@@ -18,10 +18,9 @@ const pillars = [
 ];
 
 const team = [
-  { name: 'Dr. Amit Kumar', role: 'Founder & CEO',        years: '20+ years in education',   img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80',  color: '#2563EB', bio: 'Former Oxford visiting scholar who turned his passion for education into a movement.' },
-  { name: 'Priya Nair',     role: 'Head of Overseas',     years: '15+ years counselling',    img: 'https://images.unsplash.com/photo-1573496799652-408c2ac9fe98?w=400&q=80', color: '#DC2626', bio: 'Guided 3,000+ students through European admissions with a near-perfect visa record.' },
-  { name: 'Rohit Sharma',   role: 'University Relations', years: 'Ex-Oxford alumni',          img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80', color: '#2563EB', bio: 'Built our European university network from 10 to 100+ institutions in four years.' },
-  { name: 'Deepa Menon',    role: 'Student Success',      years: 'Supported 5,000+ students', img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80', color: '#DC2626', bio: 'Leads our post-admission support team ensuring every student thrives abroad.' },
+  { name: 'Edwin', role: 'CEO', img: '/assets/team/edwin.jpeg', color: '#2563EB', bio: 'Visionary leader driving World Passport\'s mission to make international education accessible to every student.', imgPos: 'center 30%' },
+  { name: 'Ajo Augustine', role: 'CMO', img: '/assets/team/ajo-augustine.jpeg', color: '#DC2626', bio: 'Spearheading marketing strategy and brand growth to connect students with world-class educational opportunities.', imgPos: 'center top' },
+  { name: 'Mujeeb T', role: 'Director', img: '/assets/team/mujeeb-t.jpg', color: '#2563EB', bio: 'Guiding strategic direction and partnerships to expand World Passport\'s global education network.', imgPos: 'center top' },
 ];
 
 const offices = [
@@ -241,20 +240,18 @@ export default function AboutPage() {
             </h2>
             <p className="text-gray-500 max-w-md">Experienced counsellors who&apos;ve lived the international education journey</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {team.map((member, i) => (
               <div key={member.name} data-aos="fade-up" data-aos-delay={i * 80}
                 className="relative bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden cursor-default hover:shadow-md hover:-translate-y-2 transition-all">
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-64 overflow-hidden">
                   <div className="absolute inset-0 transition-transform duration-700 hover:scale-105"
-                    style={{ backgroundImage: `url('${member.img}')`, backgroundSize: 'cover', backgroundPosition: 'center top' }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+                    style={{ backgroundImage: `url('${member.img}')`, backgroundSize: 'cover', backgroundPosition: member.imgPos }} />
                 </div>
                 <div className="p-6 -mt-6 relative">
-                  <h3 className="font-display font-bold text-gray-900 mb-0.5">{member.name}</h3>
+                  <h3 className="font-display font-bold text-gray-900 text-lg mb-0.5">{member.name}</h3>
                   <div className="text-sm font-semibold mb-2" style={{ color: member.color }}>{member.role}</div>
-                  <div className="text-gray-400 text-xs mb-3">{member.years}</div>
-                  <p className="text-gray-500 text-xs leading-relaxed">{member.bio}</p>
+                  <p className="text-gray-500 text-sm leading-relaxed">{member.bio}</p>
                 </div>
               </div>
             ))}
@@ -285,8 +282,7 @@ export default function AboutPage() {
                 <span className="inline-block text-xs px-2.5 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600 border border-blue-200 mb-3">
                   {o.type}
                 </span>
-                {o.address && <p className="text-gray-500 text-xs leading-relaxed mb-2">{o.address}</p>}
-                {o.phone && <p className="text-blue-600 text-xs font-semibold">{o.phone}</p>}
+                {o.address && <p className="text-gray-500 text-xs leading-relaxed">{o.address}</p>}
               </div>
             ))}
           </div>
