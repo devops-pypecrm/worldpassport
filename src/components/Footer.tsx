@@ -4,40 +4,28 @@ import Logo from './Logo';
 
 const columns = [
   {
-    title: 'Resources',
+    title: 'Pages',
     links: [
-      { label: 'Study Guidance', href: '/overseas' },
-      { label: 'Case Studies', href: '#' },
-      { label: 'Student Success Stories', href: '#' },
-      { label: 'Scholarship Finder', href: '#' },
-      { label: 'Country Guides', href: '#' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
+      { label: 'Home', href: '/' },
+      { label: 'Overseas', href: '/overseas' },
+      { label: 'Skills', href: '/skill' },
       { label: 'About Us', href: '/about' },
-      { label: 'Careers', href: '#' },
-      { label: 'Press & Media', href: '#' },
-      { label: 'Partners', href: '#' },
       { label: 'Contact', href: '/contact' },
     ],
   },
   {
-    title: 'Support',
+    title: 'Legal',
     links: [
-      { label: 'Help Center', href: '#' },
-      { label: 'FAQ', href: '#' },
-      { label: 'Live Chat', href: '#' },
-      { label: 'Partners', href: '#' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms & Conditions', href: '/terms' },
     ],
   },
   {
-    title: 'Documentation',
+    title: 'Contact',
     links: [
-      { label: '+91 9205031277', href: 'tel:+919205031277' },
-      { label: 'bm@worldpassport.in', href: 'mailto:bm@worldpassport.in' },
-      { label: 'India & Europe offices', href: '#' },
+      { label: '+91 92921 73857', href: 'tel:+919292173857' },
+      { label: 'rajithaworldpassport@gmail.com', href: 'mailto:rajithaworldpassport@gmail.com' },
+      { label: 'India & Dubai offices', href: '/about' },
     ],
   },
 ];

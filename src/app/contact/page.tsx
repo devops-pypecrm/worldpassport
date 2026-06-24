@@ -111,9 +111,9 @@ export default function ContactPage() {
               </div>
 
               {[
-                { icon: Mail,   label: 'Email',  value: 'info@gecouncil.com' },
-                { icon: Phone,  label: 'Phone',  value: '+91 98765 43210' },
-                { icon: MapPin, label: 'Office', value: 'Mumbai, Delhi, Bangalore & Europe' },
+                { icon: Mail,   label: 'Email',  value: 'rajithaworldpassport@gmail.com' },
+                { icon: Phone,  label: 'Phone',  value: '+91 92921 73857' },
+                { icon: MapPin, label: 'Office', value: 'St George Forane Church Building, Palarivattam-Edappally Road, Ponekkara, Edappally, Kochi, Ernakulam, Kerala 682024' },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-50 border border-blue-100">

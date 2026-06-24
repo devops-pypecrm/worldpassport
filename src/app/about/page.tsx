@@ -25,7 +25,9 @@ const team = [
 ];
 
 const offices = [
-  { city: 'Edapally, Ernakulam', country: 'Kerala, India', flag: '🇮🇳', type: 'Headquarters' },
+  { city: 'Delhi (Noida)', country: 'India', flag: '🇮🇳', type: 'Headquarters', address: 'A-18, S1, Second Floor, Sector-59, Noida, UP-201301' },
+  { city: 'Dubai', country: 'UAE', flag: '🇦🇪', type: 'International Office', address: 'Office No 502, Al Fattan Plaza, Al Garhoud, UAE' },
+  { city: 'Edapally, Ernakulam', country: 'Kerala, India', flag: '🇮🇳', type: 'Regional Office', address: 'St George Forane Church Building, Palarivattam-Edappally Road, Ponekkara, Edappally, Kochi, Ernakulam, Kerala 682024' },
 ];
 
 const awards = [
@@ -109,10 +111,6 @@ export default function AboutPage() {
                   Work With Us <ArrowRight size={16} />
                 </motion.button>
               </Link>
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                className="px-8 py-4 rounded-full font-semibold text-white/80 border-2 border-white/30 hover:border-white/60 hover:text-white transition-all backdrop-blur-sm">
-                Our Services
-              </motion.button>
             </div>
 
             {/* Stats bar */}
@@ -273,16 +271,22 @@ export default function AboutPage() {
               Where We <span className="text-gradient">Operate</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {offices.map((o, i) => (
               <div key={o.city} data-aos="zoom-in" data-aos-delay={i * 80}
-                className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 text-center cursor-default hover:shadow-md hover:-translate-y-1 transition-all">
-                <div className="text-4xl mb-3">{o.flag}</div>
-                <div className="font-display font-bold text-gray-900 mb-1">{o.city}</div>
-                <div className="text-gray-400 text-xs mb-2">{o.country}</div>
-                <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600 border border-blue-200">
+                className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 cursor-default hover:shadow-md hover:-translate-y-1 transition-all">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-3xl">{o.flag}</div>
+                  <div>
+                    <div className="font-display font-bold text-gray-900">{o.city}</div>
+                    <div className="text-gray-400 text-xs">{o.country}</div>
+                  </div>
+                </div>
+                <span className="inline-block text-xs px-2.5 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600 border border-blue-200 mb-3">
                   {o.type}
                 </span>
+                {o.address && <p className="text-gray-500 text-xs leading-relaxed mb-2">{o.address}</p>}
+                {o.phone && <p className="text-blue-600 text-xs font-semibold">{o.phone}</p>}
               </div>
             ))}
           </div>

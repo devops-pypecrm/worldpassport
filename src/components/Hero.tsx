@@ -10,7 +10,7 @@ const images = [
   '/assets/hero/rome-colosseum.jpg',
   '/assets/hero/dubai-skyline.jpg',
   '/assets/hero/sydney-opera.jpg',
-  '/assets/hero/Rainy London Aesthetic 🇬🇧 _ Big Ben Evening Vibes".jpeg',
+  '/assets/hero/rainy-london.jpeg',
   '/assets/hero/one world tc tower.jpeg',
 ];
 
