@@ -18,9 +18,8 @@ const pillars = [
 ];
 
 const team = [
-  { name: 'Edwin', role: 'CEO', img: '/assets/team/edwin.jpeg', color: '#2563EB', bio: 'Visionary leader driving World Passport\'s mission to make international education accessible to every student.', imgPos: 'center 30%' },
-  { name: 'Ajo Augustine', role: 'CMO', img: '/assets/team/ajo-augustine.jpeg', color: '#DC2626', bio: 'Spearheading marketing strategy and brand growth to connect students with world-class educational opportunities.', imgPos: 'center top' },
-  { name: 'Mujeeb T', role: 'Director', img: '/assets/team/mujeeb-t.jpg', color: '#2563EB', bio: 'Guiding strategic direction and partnerships to expand World Passport\'s global education network.', imgPos: 'center top' },
+  { name: 'Edwin C Benny', role: 'CEO', img: '/assets/team/edwin.jpeg', color: '#2563EB', bio: 'Visionary leader driving World Passport\'s mission to make international education accessible to every student.', imgPos: 'center 30%' },
+  { name: 'Mujeeb T', role: 'Director', img: '/assets/team/mujeeb-t.jpg', color: '#DC2626', bio: 'Guiding strategic direction and partnerships to expand World Passport\'s global education network.', imgPos: 'center top' },
 ];
 
 const offices = [
@@ -240,7 +239,7 @@ export default function AboutPage() {
             </h2>
             <p className="text-gray-500 max-w-md">Experienced counsellors who&apos;ve lived the international education journey</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl">
             {team.map((member, i) => (
               <div key={member.name} data-aos="fade-up" data-aos-delay={i * 80}
                 className="relative bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden cursor-default hover:shadow-md hover:-translate-y-2 transition-all">

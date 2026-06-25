@@ -23,8 +23,8 @@ const columns = [
   {
     title: 'Contact',
     links: [
-      { label: '+91 92921 73857', href: 'tel:+919292173857' },
-      { label: 'rajithaworldpassport@gmail.com', href: 'mailto:rajithaworldpassport@gmail.com' },
+      { label: '+91 9205031277', href: 'tel:+919205031277' },
+      { label: 'bm@worldpassport.in', href: 'mailto:bm@worldpassport.in' },
       { label: 'India & Dubai offices', href: '/about' },
     ],
   },
