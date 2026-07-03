@@ -11,6 +11,7 @@ interface UniversityEntry {
   website?: string;
   ranking?: string;
   image?: string;
+  logo?: string;
   description?: string;
 }
 
@@ -19,6 +20,8 @@ const flagMap: Record<string, string> = {
   germany: '🇩🇪', france: '🇫🇷', 'united kingdom': '🇬🇧', usa: '🇺🇸', italy: '🇮🇹',
 };
 function getFlag(country: string) { return flagMap[country.toLowerCase()] ?? '🏫'; }
+
+const CARD_BG = '#38BDF8';
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
@@ -193,28 +196,31 @@ export default function TopUniversities() {
               key={u._id}
               className="rounded-2xl border border-gray-100 overflow-hidden bg-white hover:shadow-xl hover:-translate-y-2 transition-all duration-500 group"
             >
-              <div className="relative h-44 overflow-hidden">
-                {u.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={u.image}
-                    alt={u.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    onError={e => { e.currentTarget.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                    <GraduationCap size={40} className="text-white/50" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="relative h-44 overflow-hidden" style={{ background: CARD_BG }}>
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35) 100%)' }} />
+                {/* Logo top-left (falls back to a generic icon if no logo is set) */}
+                <div className="absolute top-4 left-4 w-14 h-14 rounded-2xl bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/50 p-2">
+                  {u.logo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={u.logo}
+                      alt={`${u.name} logo`}
+                      className="w-full h-full object-contain"
+                      onError={e => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  )}
+                  <GraduationCap size={24} className={u.logo ? 'hidden' : ''} style={{ color: CARD_BG }} />
+                </div>
                 {u.ranking && (
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-orange-600">
+                  <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[11px] font-semibold text-orange-600">
                     <Trophy size={11} />
                     {u.ranking}
                   </div>
                 )}
-                <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+                <div className="absolute bottom-3 left-4 right-4 flex items-center gap-1.5">
                   <span className="text-sm">{getFlag(u.country)}</span>
                   <span className="text-white text-xs font-medium drop-shadow">
                     {u.city ? `${u.city}, ${u.country}` : u.country}

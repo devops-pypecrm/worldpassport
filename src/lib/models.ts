@@ -21,6 +21,7 @@ const UniversitySchema = new Schema({
   website: { type: String },
   ranking: { type: String },
   image: { type: String },
+  logo: { type: String },
   description: { type: String },
   createdAt: { type: Date, default: Date.now },
 });

@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       website:     body.website     || undefined,
       ranking:     body.ranking     || undefined,
       image:       body.image       || undefined,
+      logo:        body.logo        || undefined,
       description: body.description || undefined,
     };
     const university = await University.create(safe);
@@ -54,6 +55,7 @@ export async function PUT(req: NextRequest) {
       website:     body.website     || undefined,
       ranking:     body.ranking     || undefined,
       image:       body.image       || undefined,
+      logo:        body.logo        || undefined,
       description: body.description || undefined,
     };
     await connectDB();
