@@ -131,7 +131,7 @@ const scholarships = [
 
 /* ── Services ── */
 const services = [
-  { icon: BookOpen, title: 'Program Selection', desc: 'AI-matched program recommendations from 100+ partner universities tailored to your profile.', color: '#3B82F6' },
+  { icon: BookOpen, title: 'Program Selection', desc: 'AI-matched program recommendations from 20+ partner universities tailored to your profile.', color: '#3B82F6' },
   { icon: FileCheck, title: 'Application Support', desc: 'End-to-end application: SOP, LOR, CV, transcripts — all expertly crafted and reviewed.', color: '#FF3B3B' },
   { icon: DollarSign, title: 'Scholarship Guidance', desc: 'We identify scholarships worth thousands of euros and guide you through every application.', color: '#00C9B0' },
   { icon: Plane, title: 'Visa Assistance', desc: 'Step-by-step student visa support with our near-100% approval success rate.', color: '#FFB800' },

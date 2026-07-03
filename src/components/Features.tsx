@@ -5,7 +5,7 @@ const features = [
   {
     icon: Globe,
     title: 'Global University Database',
-    desc: 'Explore institutions across 50+ countries with detailed profiles, rankings, and program info.',
+    desc: 'Explore institutions across 15+ countries with detailed profiles, rankings, and program info.',
     gradient: 'from-blue-500 to-cyan-400',
     shadow: 'shadow-blue-200/50',
     iconBg: 'bg-blue-500',

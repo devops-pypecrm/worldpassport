@@ -2,10 +2,10 @@
 import AnimatedCounter from './AnimatedCounter';
 
 const stats = [
-  { label: 'Programs Listed',           value: 10000, suffix: '+' },
-  { label: 'Partner Universities',      value: 500,   suffix: '+' },
-  { label: 'Countries Covered',         value: 50,    suffix: '+' },
-  { label: 'Student Satisfaction Rate', value: 95,    suffix: '%' },
+  { label: 'Programs Listed',           value: 100, suffix: '+' },
+  { label: 'Partner Universities',      value: 20,  suffix: '+' },
+  { label: 'Countries Covered',         value: 15,  suffix: '+' },
+  { label: 'Student Satisfaction Rate', value: 95,  suffix: '%' },
 ];
 
 export default function Stats() {

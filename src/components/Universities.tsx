@@ -72,7 +72,7 @@ export default function Universities() {
           <p className="text-gray-500 text-lg max-w-xl mx-auto">
             {universities.length > 0
               ? `${universities.length} universities across multiple countries — curated by our advisors`
-              : 'Across 12 European countries — no gatekeeping, no hidden fees'}
+              : 'Across 15+ countries — no gatekeeping, no hidden fees'}
           </p>
           <div className="mt-5 flex items-center justify-center gap-3">
             <div className="h-px w-16 bg-gradient-to-r from-transparent to-red-300" />

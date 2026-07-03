@@ -72,7 +72,7 @@ export default function Hero() {
           <div className="relative z-10 px-8 sm:px-12 lg:px-16 py-12 max-w-2xl">
             <div className="flex items-center gap-2.5 mb-6">
               <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-bold">
-                500+
+                20+
               </span>
               <span className="text-white/90 text-sm font-medium">
                 Partner Universities Worldwide.

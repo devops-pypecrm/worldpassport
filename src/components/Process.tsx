@@ -14,7 +14,7 @@ const steps = [
   {
     icon: Search,
     title: 'Discover Programs',
-    desc: 'We match you with the best-fit programs from 100+ partner universities across Europe.',
+    desc: 'We match you with the best-fit programs from 20+ partner universities across 15+ countries.',
     color: '#DC2626',
     img: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=85&auto=format&fit=crop',
     imgPosition: 'center center',

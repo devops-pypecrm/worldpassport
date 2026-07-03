@@ -12,7 +12,7 @@ import {
 
 const pillars = [
   { icon: Heart,   title: 'Listen First',      color: '#DC2626', desc: "Every student's story is unique. We listen carefully before we advise — no cookie-cutter solutions." },
-  { icon: Globe,   title: 'Global Network',     color: '#2563EB', desc: '100+ partner universities across 12 European countries give you unmatched program options.' },
+  { icon: Globe,   title: 'Global Network',     color: '#2563EB', desc: '20+ partner universities across 15+ countries give you unmatched program options.' },
   { icon: Shield,  title: 'Zero Hidden Fees',   color: '#2563EB', desc: 'Complete transparency. What we quote is exactly what you pay — no surprises, ever.' },
   { icon: Clock,   title: 'Lifetime Support',   color: '#DC2626', desc: 'From first inquiry to graduation and beyond — our counsellors remain your trusted guides.' },
 ];
@@ -33,8 +33,8 @@ const awards = [
 const statItems = [
   { val: '2015',    label: 'Year Founded',         color: '#2563EB' },
   { val: '10,000+', label: 'Students Served',       color: '#DC2626' },
-  { val: '100+',    label: 'Partner Universities',  color: '#2563EB' },
-  { val: '12',      label: 'European Countries',    color: '#DC2626' },
+  { val: '20+',     label: 'Partner Universities',  color: '#2563EB' },
+  { val: '15+',     label: 'Countries Covered',     color: '#DC2626' },
 ];
 
 export default function AboutPage() {
@@ -113,8 +113,8 @@ export default function AboutPage() {
               {[
                 { val: '2015',    label: 'Founded',             color: '#60A5FA' },
                 { val: '10,000+', label: 'Students Served',     color: '#60A5FA' },
-                { val: '100+',    label: 'Partner Universities', color: '#F87171' },
-                { val: '12',      label: 'European Countries',   color: '#F87171' },
+                { val: '20+',     label: 'Partner Universities', color: '#F87171' },
+                { val: '15+',     label: 'Countries Covered',    color: '#F87171' },
               ].map((s, i) => (
                 <div key={s.label}
                   className={`flex-1 min-w-[100px] px-4 py-4 text-center ${i < 3 ? 'border-r border-white/15' : ''}`}>
@@ -183,7 +183,7 @@ export default function AboutPage() {
                 When we started in 2015, thousands of brilliant Indian students were giving up on international education — not because they weren&apos;t qualified, but because the process felt too opaque, too expensive, and too risky.
               </p>
               <p className="text-gray-500 text-base leading-relaxed mb-6">
-                We built GEC to change that. By partnering directly with 100+ European universities, we removed the middlemen, eliminated hidden fees, and created a transparent pathway that any Indian family can trust.
+                We built GEC to change that. By partnering directly with 20+ universities across 15+ countries, we removed the middlemen, eliminated hidden fees, and created a transparent pathway that any Indian family can trust.
               </p>
               <ul className="space-y-3 mb-8">
                 {[
