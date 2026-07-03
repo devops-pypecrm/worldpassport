@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { SkillCourse } from '@/lib/models';
 
+function slugify(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export async function GET() {
   try {
     await connectDB();
@@ -19,9 +23,12 @@ export async function POST(req: NextRequest) {
     if (!body.title || !body.universityId || !body.universityName) return NextResponse.json({ error: 'Title, universityId and universityName required' }, { status: 400 });
     await connectDB();
     const item = await SkillCourse.create({
+      slug: body.slug || slugify(body.title),
       title: body.title, universityId: body.universityId, universityName: body.universityName,
+      universitySubtitle: body.universitySubtitle || undefined,
       color: body.color || '#3B82F6', icon: body.icon || 'BookOpen',
       duration: body.duration || '', mode: body.mode || 'Online', tools: body.tools || '',
+      img: body.img || undefined,
       highlights: body.highlights || [],
     });
     return NextResponse.json({ success: true, skillCourse: item }, { status: 201 });

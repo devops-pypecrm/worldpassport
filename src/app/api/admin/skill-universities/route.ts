@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { SkillUniversity } from '@/lib/models';
 
+function slugify(text: string) {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export async function GET() {
   try {
     await connectDB();
@@ -18,7 +22,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body.name || !body.shortName) return NextResponse.json({ error: 'Name and shortName required' }, { status: 400 });
     await connectDB();
-    const item = await SkillUniversity.create({ name: body.name, shortName: body.shortName, subtitle: body.subtitle || '', color: body.color || '#3B82F6', description: body.description || '' });
+    const item = await SkillUniversity.create({
+      slug: body.slug || slugify(body.shortName),
+      name: body.name, shortName: body.shortName, subtitle: body.subtitle || '',
+      color: body.color || '#3B82F6', description: body.description || '',
+      flag: body.flag || undefined, logo: body.logo || undefined, bgImage: body.bgImage || undefined,
+    });
     return NextResponse.json({ success: true, skillUniversity: item }, { status: 201 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';

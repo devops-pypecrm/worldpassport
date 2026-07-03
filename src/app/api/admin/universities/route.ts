@@ -31,7 +31,12 @@ export async function POST(req: NextRequest) {
       ranking:     body.ranking     || undefined,
       image:       body.image       || undefined,
       logo:        body.logo        || undefined,
+      color:       body.color       || undefined,
       description: body.description || undefined,
+      about:       body.about       || undefined,
+      programs:    body.programs    || undefined,
+      highlights:  body.highlights  || undefined,
+      stats:       body.stats       || undefined,
     };
     const university = await University.create(safe);
     return NextResponse.json({ success: true, university }, { status: 201 });
@@ -56,7 +61,12 @@ export async function PUT(req: NextRequest) {
       ranking:     body.ranking     || undefined,
       image:       body.image       || undefined,
       logo:        body.logo        || undefined,
+      color:       body.color       || undefined,
       description: body.description || undefined,
+      about:       body.about       || undefined,
+      programs:    body.programs    || undefined,
+      highlights:  body.highlights  || undefined,
+      stats:       body.stats       || undefined,
     };
     await connectDB();
     const university = await University.findByIdAndUpdate(id, safe, { new: true, runValidators: true });

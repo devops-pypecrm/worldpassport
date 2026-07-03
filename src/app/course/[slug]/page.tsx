@@ -5,22 +5,47 @@ import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getCourseBySlug } from '@/lib/courseData';
 import {
   ArrowLeft, ArrowRight, Clock, Monitor, Wrench, CheckCircle, GraduationCap,
   BookOpen, Globe, Award, Users, Rocket, BadgeCheck, Zap, Target,
   TrendingUp, Shield, Star, FileCheck, Briefcase, MessageCircle, ChevronDown,
   MapPin, Calendar, Layers,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.06 } } };
 
+interface CourseDetail {
+  _id: string; slug: string; title: string; universityId: string; universityName: string;
+  universitySubtitle?: string; color: string; duration?: string; mode?: string;
+  tools?: string | null; img?: string; highlights: string[];
+}
+
 export default function CourseDetailPage() {
   const { slug } = useParams();
-  const course = getCourseBySlug(slug as string);
+  const [course, setCourse] = useState<CourseDetail | null | undefined>(undefined);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch('/api/admin/skill-courses')
+      .then(r => r.json())
+      .then(data => {
+        const list: CourseDetail[] = data.skillCourses || [];
+        setCourse(list.find(c => c.slug === slug) ?? null);
+      })
+      .catch(() => setCourse(null));
+  }, [slug]);
+
+  if (course === undefined) return (
+    <PageWrapper bg="/assets/page-bg-skill.jpg">
+      <Navbar />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+      <Footer />
+    </PageWrapper>
+  );
 
   if (!course) return (
     <PageWrapper bg="/assets/page-bg-skill.jpg">
@@ -40,11 +65,13 @@ export default function CourseDetailPage() {
   );
 
   const color = course.color;
+  const duration = course.duration || '';
+  const mode = course.mode || 'Online';
   const toolsList = course.tools ? course.tools.split(',').map(t => t.trim()) : [];
 
   const faqs = [
     { q: 'What certificate will I receive?', a: `You will receive an ECTS-accredited certificate from ${course.universityName}, recognized across 48+ European countries and globally by employers.` },
-    { q: 'Is this course fully online?', a: `This course is delivered ${course.mode.toLowerCase()}. You can learn from anywhere with a stable internet connection and access materials 24/7.` },
+    { q: 'Is this course fully online?', a: `This course is delivered ${mode.toLowerCase()}. You can learn from anywhere with a stable internet connection and access materials 24/7.` },
     { q: 'What are the prerequisites?', a: 'No prior experience is required for most programs. Basic computer literacy and English proficiency are recommended.' },
     { q: 'Will I get placement support?', a: 'Yes! Upon successful completion, SkillDad provides dedicated placement and internship facilitation — including CV building, interview coaching, and job matching with 500+ partner companies.' },
     { q: 'How long does the course take?', a: `This program runs for ${course.duration}. You can study at your own pace with flexible deadlines and live instructor support sessions.` },
@@ -127,7 +154,7 @@ export default function CourseDetailPage() {
                 This {course.duration} program from <span className="text-gray-900 font-semibold">{course.universityName}</span> is designed to equip you with industry-ready skills through theoretical knowledge and practical application. Upon completion, you receive an internationally recognized ECTS certificate valid across 48+ European countries.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                The program is delivered {course.mode.toLowerCase()} with live instructor sessions, hands-on projects, and mentorship. SkillDad provides dedicated placement support to ensure your career growth after certification.
+                The program is delivered {mode.toLowerCase()} with live instructor sessions, hands-on projects, and mentorship. SkillDad provides dedicated placement support to ensure your career growth after certification.
               </p>
             </motion.div>
 

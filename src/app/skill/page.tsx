@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
@@ -13,55 +13,52 @@ import {
   BadgeCheck, Shield, Users, Rocket, MapPin, Zap,
   ChevronRight,
 } from 'lucide-react';
-import { skillUniversities } from '@/lib/courseData';
 
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 
 const iconMap: Record<string, typeof Cpu> = { Cpu, Brain, ShoppingCart, BarChart3, Megaphone, Glasses, Home, Stethoscope, BookOpen };
 
-const universities = [
-  {
-    id: 'cit',
-    name: 'Canadian Institute of Technology (CIT)',
-    shortName: 'Canadian Institute of Technology',
-    subtitle: 'Tirana, Albania',
-    color: '#3B82F6',
-    flag: '🇦🇱',
-    description: 'A recognized European higher education institution committed to internationally aligned academic excellence, innovation, and applied learning.',
-    logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/d/d9/Logo_of_the_Canadian_Institute_of_Technology.svg/250px-Logo_of_the_Canadian_Institute_of_Technology.svg.png',
-    bgImage: 'https://images.unsplash.com/photo-1562774053-701939374585?w=1200&q=80&auto=format&fit=crop',
-    programs: [
-      { icon: Cpu, title: 'AI Video Creation – Smart & Sustainable', color: '#A855F7', duration: '3 Months', mode: 'Online', tools: 'Runway ML, ChatGPT, ElevenLabs', img: 'https://images.unsplash.com/photo-1535016120720-40c646be5580?w=600&q=80&auto=format&fit=crop', highlights: ['Create professional videos using AI tools', 'Smart scriptwriting & automated production', 'AI-powered media analytics & editing', 'Content monetization strategies', 'Freelancing opportunities in AI media'] },
-      { icon: Brain, title: 'Applied Data Science & Machine Learning', color: '#3B82F6', duration: '4 Months', mode: 'Online', tools: 'Python, TensorFlow, Jupyter', img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80&auto=format&fit=crop', highlights: ['Understand real-world data analysis techniques', 'Build machine learning models for business', 'Predict trends using AI-driven insights', 'Ethical and responsible AI practices', 'Data-driven decision making frameworks'] },
-      { icon: ShoppingCart, title: 'Logistics & Supply Chain Management', color: '#00C9B0', duration: '3 Months', mode: 'Online', tools: 'Excel, ERP Systems, SAP', img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80&auto=format&fit=crop', highlights: ['Modern supply chain systems & workflows', 'Inventory and distribution management', 'Cost optimization strategies', 'KPI monitoring and performance analysis', 'Risk management in logistics operations'] },
-      { icon: BarChart3, title: 'Business Intelligence & Data Analytics', color: '#FFB800', duration: '4 Months', mode: 'Online', tools: 'Power BI, Tableau, SQL', img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80&auto=format&fit=crop', highlights: ['Transform raw data into business insights', 'Design interactive dashboards & reports', 'KPI tracking for business performance', 'Data visualization for decision making', 'Strategic analytics for organizations'] },
-      { icon: Megaphone, title: 'Digital Marketing with AI', color: '#FF3B3B', duration: '3 Months', mode: 'Online', tools: 'ChatGPT, Canva AI, Google Analytics', img: 'https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=600&q=80&auto=format&fit=crop', highlights: ['AI-powered content creation strategies', 'Smart campaign optimization techniques', 'Customer behavior and audience analytics', 'Marketing automation using AI tools', 'Improve campaign ROI and performance'] },
-      { icon: Glasses, title: 'Virtual Reality (VR) for Business', color: '#FF6B00', duration: '3 Months', mode: 'Online', tools: 'Unity, VR Headsets, Blender', img: 'https://images.unsplash.com/photo-1617802690992-15d93263d3a9?w=600&q=80&auto=format&fit=crop', highlights: ['Introduction to immersive VR technologies', 'Business training and simulation solutions', 'VR integration for modern enterprises', 'Safety and operational applications', 'Future trends in immersive technologies'] },
-    ],
-  },
-  {
-    id: 'mua',
-    name: 'Mediterranean University of Albania',
-    shortName: 'Mediterranean University',
-    subtitle: 'Tirana, Albania',
-    color: '#DC2626',
-    flag: '🇦🇱',
-    description: 'A recognized European private higher education institution dedicated to academic excellence, research development, and international cooperation.',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Mediterranean_University_of_Albania_logo.png/200px-Mediterranean_University_of_Albania_logo.png',
-    bgImage: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80&auto=format&fit=crop',
-    programs: [
-      { icon: Home, title: 'Real Estate Broker Certification', color: '#3B82F6', duration: '4 Months', mode: 'Online + Practical', tools: null, img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80&auto=format&fit=crop', highlights: ['Civil & Commercial Law fundamentals', 'Property Valuation methods', 'Contract Drafting & negotiation', 'Tax Legislation for real estate', 'Professional Ethics & standards', 'Practical Agency Training'] },
-      { icon: Brain, title: 'Data Science & AI Professional Training', color: '#A855F7', duration: '6 Months', mode: 'Online', tools: 'Python, SQL, TensorFlow', img: 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&q=80&auto=format&fit=crop', highlights: ['Data Structures & SQL databases', 'Python for Data Science applications', 'Probability & Statistics foundations', 'Machine Learning algorithms', 'Deep Learning & neural networks', 'AI Tools Integration for business'] },
-      { icon: Megaphone, title: 'Digital Marketing Professional', color: '#FF3B3B', duration: '4 Months', mode: 'Online', tools: 'Google Ads, Meta, Semrush', img: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=600&q=80&auto=format&fit=crop', highlights: ['Digital Strategy & Market Research', 'SEO & Website Development', 'Social Media & Google Ads management', 'Data Analytics for marketing', 'AI-Based Content Optimization', 'Practical Campaign Development'] },
-      { icon: Stethoscope, title: 'Health Administrator', color: '#00C9B0', duration: '5 Months', mode: 'Online + Practical', tools: null, img: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&q=80&auto=format&fit=crop', highlights: ['Healthcare Systems & Policy analysis', 'Health Law & Ethics compliance', 'Hospital Operations & Finance', 'Quality & Patient Safety standards', 'Digital Health Systems management', 'Practical Training in healthcare'] },
-    ],
-  },
-];
+interface SkillUniversityEntry {
+  _id: string; slug: string; name: string; shortName: string; subtitle?: string;
+  color: string; flag?: string; logo?: string; bgImage?: string; description?: string;
+}
+interface SkillCourseEntry {
+  _id: string; slug: string; title: string; universityId: string; universityName: string;
+  color: string; icon: string; duration?: string; mode?: string; tools?: string | null;
+  img?: string; highlights: string[];
+}
 
 export default function SkillPage() {
-  const [activeUni, setActiveUni] = useState('cit');
-  const uni = universities.find(u => u.id === activeUni)!;
+  const [universities, setUniversities] = useState<SkillUniversityEntry[]>([]);
+  const [courses, setCourses] = useState<SkillCourseEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeUni, setActiveUni] = useState('');
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/skill-universities').then(r => r.json()),
+      fetch('/api/admin/skill-courses').then(r => r.json()),
+    ]).then(([uniData, courseData]) => {
+      const unis: SkillUniversityEntry[] = uniData.skillUniversities || [];
+      setUniversities(unis);
+      setCourses(courseData.skillCourses || []);
+      if (unis.length > 0) setActiveUni(unis[0].slug);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const uni = universities.find(u => u.slug === activeUni);
+  const uniPrograms = courses.filter(c => c.universityId === activeUni);
+
+  if (loading) return (
+    <PageWrapper bg="/assets/page-bg-skill.jpg">
+      <Navbar />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+      <Footer />
+    </PageWrapper>
+  );
 
   return (
     <PageWrapper bg="/assets/page-bg-skill.jpg">
@@ -130,9 +127,9 @@ export default function SkillPage() {
                 <div className="rounded-2xl p-4 bg-white/10 backdrop-blur-md border border-white/20">
                   <div className="flex items-center gap-2 mb-1">
                     <Building2 size={14} className="text-blue-400" />
-                    <span className="text-white text-xs font-bold">2 Universities</span>
+                    <span className="text-white text-xs font-bold">{universities.length} Universities</span>
                   </div>
-                  <p className="text-white/40 text-[10px]">CIT & Mediterranean</p>
+                  <p className="text-white/40 text-[10px]">{universities.map(u => u.shortName).join(' & ')}</p>
                 </div>
                 <div className="rounded-2xl p-4 bg-white/10 backdrop-blur-md border border-white/20">
                   <div className="flex items-center gap-2 mb-1">
@@ -159,7 +156,7 @@ export default function SkillPage() {
 
           <div className="grid md:grid-cols-2 gap-6">
             {universities.map((u, i) => (
-              <motion.div key={u.id}
+              <motion.div key={u._id}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -185,9 +182,9 @@ export default function SkillPage() {
                   <div className="flex flex-wrap gap-2 mb-4">
                     <span className="text-[10px] px-3 py-1 rounded-full font-bold bg-blue-50 text-blue-600 border border-blue-100">ECTS Accredited</span>
                     <span className="text-[10px] px-3 py-1 rounded-full font-bold bg-purple-50 text-purple-600 border border-purple-100">Bologna Process</span>
-                    <span className="text-[10px] px-3 py-1 rounded-full font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">{u.programs.length} Programs</span>
+                    <span className="text-[10px] px-3 py-1 rounded-full font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">{courses.filter(c => c.universityId === u.slug).length} Programs</span>
                   </div>
-                  <Link href={`/skill/${u.id}`}
+                  <Link href={`/skill/${u.slug}`}
                     className="inline-flex items-center gap-2 text-sm font-semibold transition-colors"
                     style={{ color: u.color }}>
                     View University Details <ChevronRight size={14} />
@@ -259,9 +256,9 @@ export default function SkillPage() {
 
           <div className="flex justify-center gap-3 mb-8">
             {universities.map((u) => (
-              <button key={u.id} onClick={() => setActiveUni(u.id)}
+              <button key={u._id} onClick={() => setActiveUni(u.slug)}
                 className="flex items-center gap-2.5 px-6 py-3 rounded-full text-sm font-semibold transition-all"
-                style={activeUni === u.id ? {
+                style={activeUni === u.slug ? {
                   background: `linear-gradient(135deg, ${u.color}, ${u.color}CC)`, color: '#fff',
                   boxShadow: `0 8px 25px ${u.color}35`,
                 } : { background: '#F8FAFC', color: '#6B7280', border: '1px solid #E5E7EB' }}>
@@ -271,6 +268,7 @@ export default function SkillPage() {
             ))}
           </div>
 
+          {uni && (
           <div className="rounded-2xl p-4 mb-6 flex items-center gap-4"
             style={{ background: `linear-gradient(135deg, ${uni.color}08, ${uni.color}04)`, border: `1px solid ${uni.color}15` }}>
             <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-1.5 border border-gray-100 shadow-sm">
@@ -281,12 +279,13 @@ export default function SkillPage() {
               <p className="text-gray-400 text-xs flex items-center gap-1"><MapPin size={10} /> {uni.subtitle} · ECTS Accredited</p>
             </div>
           </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {uni.programs.map((prog, i) => {
-              const Icon = prog.icon;
+            {uniPrograms.map((prog, i) => {
+              const Icon = iconMap[prog.icon] || BookOpen;
               return (
-                <motion.div key={prog.title}
+                <motion.div key={prog._id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -336,7 +335,7 @@ export default function SkillPage() {
                       </div>
                     )}
 
-                    <Link href={`/course/${prog.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}`}
+                    <Link href={`/course/${prog.slug}`}
                       className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
                       style={{ background: `linear-gradient(135deg, ${prog.color}, ${prog.color}CC)`, boxShadow: `0 4px 15px ${prog.color}30` }}>
                       View Details <ArrowRight size={14} />

@@ -1,11 +1,11 @@
 'use client';
 import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getUniversityById } from '@/lib/courseData';
 import {
   ArrowLeft, ArrowRight, CheckCircle, GraduationCap,
   BookOpen, Globe, Award, Users, Rocket, BadgeCheck, Zap,
@@ -16,9 +16,43 @@ import {
 const fadeUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.08 } } };
 
+interface SkillUniversityDetail {
+  _id: string; slug: string; name: string; shortName: string; subtitle?: string;
+  color: string; logo?: string; description?: string;
+}
+interface SkillCourseEntry {
+  _id: string; slug: string; title: string; universityId: string;
+  color: string; duration?: string; mode?: string; tools?: string | null;
+  img?: string; highlights: string[];
+}
+
 export default function UniversityDetailPage() {
   const { universityId } = useParams();
-  const uni = getUniversityById(universityId as string);
+  const [uni, setUni] = useState<SkillUniversityDetail | null | undefined>(undefined);
+  const [programs, setPrograms] = useState<SkillCourseEntry[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/admin/skill-universities').then(r => r.json()),
+      fetch('/api/admin/skill-courses').then(r => r.json()),
+    ]).then(([uniData, courseData]) => {
+      const unis: SkillUniversityDetail[] = uniData.skillUniversities || [];
+      const courses: SkillCourseEntry[] = courseData.skillCourses || [];
+      const found = unis.find(u => u.slug === universityId);
+      setUni(found ?? null);
+      if (found) setPrograms(courses.filter(c => c.universityId === found.slug));
+    }).catch(() => setUni(null));
+  }, [universityId]);
+
+  if (uni === undefined) return (
+    <PageWrapper bg="/assets/page-bg-skill.jpg">
+      <Navbar />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+      <Footer />
+    </PageWrapper>
+  );
 
   if (!uni) return (
     <PageWrapper bg="/assets/page-bg-skill.jpg">
@@ -64,7 +98,7 @@ export default function UniversityDetailPage() {
               <motion.div variants={fadeUp} className="flex flex-wrap gap-2 mb-5">
                 <span className="px-4 py-1.5 rounded-full bg-white/25 text-white text-xs font-bold border border-white/30 backdrop-blur-sm">ECTS Certified</span>
                 <span className="px-4 py-1.5 rounded-full bg-white/20 text-white text-xs font-medium border border-white/20 flex items-center gap-1.5"><MapPin size={11} /> {uni.subtitle}</span>
-                <span className="px-4 py-1.5 rounded-full bg-white/20 text-white text-xs font-medium border border-white/20 flex items-center gap-1.5"><BookOpen size={11} /> {uni.programs.length} Programs</span>
+                <span className="px-4 py-1.5 rounded-full bg-white/20 text-white text-xs font-medium border border-white/20 flex items-center gap-1.5"><BookOpen size={11} /> {programs.length} Programs</span>
               </motion.div>
               <motion.h1 variants={fadeUp} className="font-black text-3xl sm:text-4xl lg:text-5xl text-white mb-3 leading-tight">{uni.name}</motion.h1>
               <motion.p variants={fadeUp} className="text-white/70 text-base sm:text-lg max-w-2xl">{uni.description}</motion.p>
@@ -79,7 +113,7 @@ export default function UniversityDetailPage() {
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
             className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: BookOpen, label: 'Programs', value: `${uni.programs.length} Courses`, c: '#3B82F6' },
+              { icon: BookOpen, label: 'Programs', value: `${programs.length} Courses`, c: '#3B82F6' },
               { icon: MapPin, label: 'Location', value: uni.subtitle, c: '#F59E0B' },
               { icon: BadgeCheck, label: 'Accreditation', value: 'ECTS Credits', c: '#8B5CF6' },
               { icon: Rocket, label: 'Placement', value: 'SkillDad', c: '#10B981' },
@@ -149,7 +183,7 @@ export default function UniversityDetailPage() {
             <motion.div variants={fadeUp} className="bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
               <h2 className="font-bold text-xl text-gray-900 mb-6 flex items-center gap-2"><BookOpen size={20} style={{ color }} /> Programs Offered</h2>
               <div className="space-y-4">
-                {uni.programs.map((prog, i) => (
+                {programs.map((prog, i) => (
                   <motion.div key={prog.slug}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
@@ -243,7 +277,7 @@ export default function UniversityDetailPage() {
 
               <div className="space-y-2.5 mb-6">
                 {[
-                  { icon: BookOpen, label: 'Programs', value: `${uni.programs.length} Courses` },
+                  { icon: BookOpen, label: 'Programs', value: `${programs.length} Courses` },
                   { icon: BadgeCheck, label: 'Certificate', value: 'ECTS Credits', vc: 'text-blue-600' },
                   { icon: Rocket, label: 'Placement', value: 'SkillDad', vc: 'text-emerald-600' },
                   { icon: Globe, label: 'Recognition', value: '48+ Countries', vc: 'text-purple-600' },

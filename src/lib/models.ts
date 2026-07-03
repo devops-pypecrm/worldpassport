@@ -22,7 +22,12 @@ const UniversitySchema = new Schema({
   ranking: { type: String },
   image: { type: String },
   logo: { type: String },
+  color: { type: String, default: '#3B82F6' },
   description: { type: String },
+  about: { type: String },
+  programs: [{ type: String }],
+  highlights: [{ type: String }],
+  stats: [{ label: { type: String }, value: { type: String } }],
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -39,23 +44,30 @@ const CourseSchema = new Schema({
 });
 
 const SkillUniversitySchema = new Schema({
+  slug: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   shortName: { type: String, required: true },
   subtitle: { type: String },
   color: { type: String, default: '#3B82F6' },
+  flag: { type: String },
+  logo: { type: String },
+  bgImage: { type: String },
   description: { type: String },
   createdAt: { type: Date, default: Date.now },
 });
 
 const SkillCourseSchema = new Schema({
+  slug: { type: String, required: true, unique: true },
   title: { type: String, required: true },
   universityId: { type: String, required: true },
   universityName: { type: String, required: true },
+  universitySubtitle: { type: String },
   color: { type: String, default: '#3B82F6' },
   icon: { type: String, default: 'BookOpen' },
   duration: { type: String },
   mode: { type: String, default: 'Online' },
   tools: { type: String },
+  img: { type: String },
   highlights: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
 });
