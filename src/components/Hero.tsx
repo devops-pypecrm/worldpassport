@@ -92,7 +92,7 @@ export default function Hero() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search your desire subject..."
+                placeholder="Select your country..."
                 className="flex-1 px-5 py-3.5 text-sm text-gray-700 placeholder-gray-400 bg-transparent outline-none"
               />
               <button type="submit" className="flex items-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors flex-shrink-0 m-1 rounded-full">

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import {
   Plus, Trash2, Loader2, X, LayoutDashboard, GraduationCap,
   BookOpen, Mail, LogOut, ChevronRight, Globe, ExternalLink, Pencil,
-  CheckCircle2, AlertCircle, Building2, Users, Award,
+  CheckCircle2, AlertCircle, Building2, Users, Award, Handshake, Check,
 } from 'lucide-react';
 
 type ToastType = 'success' | 'error';
@@ -40,8 +40,9 @@ interface CourseEntry { _id: string; title: string; university: string; country:
 interface SkillUniEntry { _id: string; name: string; shortName: string; subtitle?: string; color?: string; description?: string; createdAt: string; }
 interface SkillCourseEntry { _id: string; title: string; universityId: string; universityName: string; color?: string; duration?: string; mode?: string; tools?: string; highlights: string[]; createdAt: string; }
 interface LeaderEntry { _id: string; name: string; role: string; bio?: string; image?: string; years?: string; order?: number; createdAt: string; }
+interface PartnerEntry { _id: string; name: string; organization: string; email: string; phone?: string; message?: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; }
 
-type Tab = 'dashboard' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts';
+type Tab = 'dashboard' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
 
 const EMPTY_UNI = { name: '', country: '', city: '', website: '', ranking: '', image: '', description: '' };
 const EMPTY_COURSE = { title: '', university: '', country: '', level: "Master's", duration: '', tuitionFee: '', intake: '', description: '' };
@@ -94,6 +95,7 @@ export default function AdminDashboard() {
   const [skillUnis, setSkillUnis] = useState<SkillUniEntry[]>([]);
   const [skillCourses, setSkillCourses] = useState<SkillCourseEntry[]>([]);
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
+  const [partners, setPartners] = useState<PartnerEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [modal, setModal] = useState<string | null>(null);
@@ -111,13 +113,14 @@ export default function AdminDashboard() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [c, u, co, su, sc, l] = await Promise.all([
+      const [c, u, co, su, sc, l, p] = await Promise.all([
         fetch('/api/contact').then(r => r.json()),
         fetch('/api/admin/universities').then(r => r.json()),
         fetch('/api/admin/courses').then(r => r.json()),
         fetch('/api/admin/skill-universities').then(r => r.json()),
         fetch('/api/admin/skill-courses').then(r => r.json()),
         fetch('/api/admin/leaders').then(r => r.json()),
+        fetch('/api/admin/partners').then(r => r.json()),
       ]);
       setContacts(c.contacts || []);
       setUniversities(u.universities || []);
@@ -125,6 +128,7 @@ export default function AdminDashboard() {
       setSkillUnis(su.skillUniversities || []);
       setSkillCourses(sc.skillCourses || []);
       setLeaders(l.leaders || []);
+      setPartners(p.partners || []);
     } finally { setLoading(false); }
   }, []);
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -232,6 +236,16 @@ export default function AdminDashboard() {
   const deleteLeader = async (id: string) => { if (!confirm('Delete?')) return; try { await crudAction('/api/admin/leaders', 'DELETE', null, id); setLeaders(p => p.filter(l => l._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
   const editLeader = (l: LeaderEntry) => { setEditingId(l._id); setLeaderForm({ name: l.name, role: l.role, bio: l.bio || '', image: l.image || '', years: l.years || '', order: String(l.order || 0) }); setModal('leader'); };
 
+  // Partner actions
+  const setPartnerStatus = async (id: string, status: 'approved' | 'rejected' | 'pending') => {
+    try {
+      const data = await crudAction('/api/admin/partners', 'PATCH', { status }, id);
+      setPartners(p => p.map(x => x._id === id ? data.partner : x));
+      showToast(status === 'approved' ? 'Partner approved' : status === 'rejected' ? 'Partner rejected' : 'Status updated');
+    } catch (err) { showToast(err instanceof Error ? err.message : 'Error', 'error'); }
+  };
+  const deletePartner = async (id: string) => { if (!confirm('Delete this partner application?')) return; try { await crudAction('/api/admin/partners', 'DELETE', null, id); setPartners(p => p.filter(x => x._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
+
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
     { id: 'universities', label: 'Universities', icon: <GraduationCap size={18} /> },
@@ -239,6 +253,7 @@ export default function AdminDashboard() {
     { id: 'skill-unis', label: 'Skill Universities', icon: <Building2 size={18} /> },
     { id: 'skill-courses', label: 'Skill Courses', icon: <Award size={18} /> },
     { id: 'leaders', label: 'Leadership', icon: <Users size={18} /> },
+    { id: 'partners', label: 'B2B Partners', icon: <Handshake size={18} /> },
     { id: 'contacts', label: 'Contact', icon: <Mail size={18} /> },
   ];
 
@@ -303,6 +318,7 @@ export default function AdminDashboard() {
                 <StatCard icon={<Building2 size={20} />} label="Skill Unis" value={loading ? '—' : skillUnis.length} color="linear-gradient(135deg,#F59E0B,#D97706)" onClick={() => setActiveTab('skill-unis')} />
                 <StatCard icon={<Award size={20} />} label="Skill Courses" value={loading ? '—' : skillCourses.length} color="linear-gradient(135deg,#10B981,#059669)" onClick={() => setActiveTab('skill-courses')} />
                 <StatCard icon={<Users size={20} />} label="Leaders" value={loading ? '—' : leaders.length} color="linear-gradient(135deg,#EC4899,#DB2777)" onClick={() => setActiveTab('leaders')} />
+                <StatCard icon={<Handshake size={20} />} label="B2B Partners" value={loading ? '—' : partners.length} color="linear-gradient(135deg,#059669,#047857)" onClick={() => setActiveTab('partners')} />
                 <StatCard icon={<Mail size={20} />} label="Messages" value={loading ? '—' : contacts.length} color="linear-gradient(135deg,#EF4444,#DC2626)" onClick={() => setActiveTab('contacts')} />
               </div>
             </div>
@@ -466,6 +482,51 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* B2B PARTNERS */}
+          {activeTab === 'partners' && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">B2B Partner Applications</h2>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                {loading ? <Spinner /> : partners.length === 0 ? <Empty label="No partner applications yet" /> : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead><tr className="bg-gray-50">{['#','Name','Organization','Email','Phone','Status','Date',''].map(h => <th key={h} className="px-5 py-3 text-xs font-bold text-gray-400 uppercase text-left">{h}</th>)}</tr></thead>
+                      <tbody>
+                        {partners.map((p, i) => (
+                          <tr key={p._id} className="border-t border-gray-50 hover:bg-violet-50/20">
+                            <td className="px-5 py-3 text-gray-300 text-xs">{i+1}</td>
+                            <td className="px-5 py-3 font-semibold text-gray-900">{p.name}</td>
+                            <td className="px-5 py-3 text-gray-600">{p.organization}</td>
+                            <td className="px-5 py-3 text-blue-600"><a href={`mailto:${p.email}`}>{p.email}</a></td>
+                            <td className="px-5 py-3 text-gray-500">{p.phone || '—'}</td>
+                            <td className="px-5 py-3">
+                              <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold capitalize ${
+                                p.status === 'approved' ? 'bg-emerald-50 text-emerald-600' :
+                                p.status === 'rejected' ? 'bg-red-50 text-red-500' : 'bg-amber-50 text-amber-600'
+                              }`}>{p.status}</span>
+                            </td>
+                            <td className="px-5 py-3 text-gray-300 text-xs">{new Date(p.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
+                            <td className="px-5 py-3">
+                              <div className="flex items-center gap-1">
+                                {p.status !== 'approved' && (
+                                  <button onClick={() => setPartnerStatus(p._id, 'approved')} title="Approve" className="p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-500"><Check size={14} /></button>
+                                )}
+                                {p.status !== 'rejected' && (
+                                  <button onClick={() => setPartnerStatus(p._id, 'rejected')} title="Reject" className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><X size={14} /></button>
+                                )}
+                                <button onClick={() => deletePartner(p._id)} title="Delete" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400"><Trash2 size={13} /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

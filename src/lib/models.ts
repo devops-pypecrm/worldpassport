@@ -72,6 +72,20 @@ const SkillCourseSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+const PartnerSchema = new Schema({
+  name: { type: String, required: true },
+  organization: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String },
+  message: { type: String },
+  passwordHash: { type: String, required: true },
+  passwordSalt: { type: String, required: true },
+  status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+  sessionToken: { type: String },
+  sessionExpires: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const LeaderSchema = new Schema({
   name: { type: String, required: true },
   role: { type: String, required: true },
@@ -88,4 +102,5 @@ export const University     = mongoose.models.University     || mongoose.model('
 export const Course         = mongoose.models.Course         || mongoose.model('Course',         CourseSchema);
 export const SkillUniversity = mongoose.models.SkillUniversity || mongoose.model('SkillUniversity', SkillUniversitySchema);
 export const SkillCourse    = mongoose.models.SkillCourse    || mongoose.model('SkillCourse',    SkillCourseSchema);
+export const Partner        = mongoose.models.Partner        || mongoose.model('Partner',        PartnerSchema);
 export const Leader         = mongoose.models.Leader         || mongoose.model('Leader',         LeaderSchema);

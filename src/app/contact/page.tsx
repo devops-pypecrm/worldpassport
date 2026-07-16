@@ -46,7 +46,7 @@ export default function ContactPage() {
       <Navbar />
 
       {/* ── Hero ── */}
-      <section className="relative min-h-[65vh] flex flex-col justify-end overflow-hidden bg-[#060C1F] -mt-20 pt-20">
+      <section className="relative min-h-[65vh] flex flex-col justify-end overflow-hidden bg-[#060C1F] -mt-28 pt-28">
 
         {/* Background image */}
         <img

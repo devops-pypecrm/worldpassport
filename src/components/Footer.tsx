@@ -8,7 +8,7 @@ const columns = [
     links: [
       { label: 'Home', href: '/' },
       { label: 'Overseas', href: '/overseas' },
-      { label: 'Skills', href: '/skill' },
+      { label: 'B2B Portal', href: '/b2b' },
       { label: 'About Us', href: '/about' },
       { label: 'Contact', href: '/contact' },
     ],
@@ -36,8 +36,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="inline-block mb-4">
-              <Logo size={32} className="brightness-0 invert" />
+            <Link href="/" className="inline-block mb-4 bg-white rounded-xl p-2">
+              <Logo size={40} />
             </Link>
           </div>
 

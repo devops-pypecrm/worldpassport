@@ -10,7 +10,7 @@ import AdminLoginModal from './AdminLoginModal';
 const links = [
   { href: '/', label: 'Home' },
   { href: '/overseas', label: 'Overseas' },
-  { href: '/skill', label: 'Skills' },
+  { href: '/b2b', label: 'B2B Portal' },
   { href: '/about', label: 'About Us' },
 ];
 
@@ -36,7 +36,7 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-20 flex items-center justify-between">
+          <div className="h-28 flex items-center justify-between">
 
             {/* Nav links — pill style */}
             <nav className="hidden md:flex items-center">
@@ -78,7 +78,7 @@ export default function Navbar() {
                 Login
               </button>
               <Link href="/" className="flex items-center">
-                <Logo size={48} animate={false} />
+                <Logo size={56} />
               </Link>
             </div>
 
@@ -92,7 +92,7 @@ export default function Navbar() {
               {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
             <Link href="/" className="flex items-center md:hidden flex-shrink-0">
-              <Logo size={40} animate={false} />
+              <Logo size={48} />
             </Link>
           </div>
         </div>

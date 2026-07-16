@@ -44,7 +44,7 @@ export default function AboutPage() {
       <Navbar />
 
       {/* Hero — overseas-style full-bleed */}
-      <section className="relative min-h-[90vh] flex flex-col justify-end overflow-hidden bg-[#f0f4ff] -mt-20 pt-20">
+      <section className="relative min-h-[90vh] flex flex-col justify-end overflow-hidden bg-[#f0f4ff] -mt-28 pt-28">
 
         {/* Full-bleed background image */}
         <img
