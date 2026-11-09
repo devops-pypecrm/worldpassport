@@ -109,7 +109,7 @@ export default function RecruitmentPage() {
 
       {/* ── Hero ── */}
       <section className="relative min-h-[88vh] flex items-center overflow-hidden"
-        style={{ background: 'linear-gradient(to bottom right, #0F172A, #1E293B, #0F172A)' }}>
+        style={{ background: '#1B2B5A' }}>
 
         {/* Ambient glows */}
         <div className="absolute top-20 right-10 w-[500px] h-[500px] rounded-full pointer-events-none"
@@ -484,7 +484,7 @@ export default function RecruitmentPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 relative" style={{ background: 'linear-gradient(to bottom right, #0F172A, #1E293B)' }}>
+      <section className="py-24 relative" style={{ background: '#1B2B5A' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             className="rounded-3xl p-10 md:p-14 text-center"

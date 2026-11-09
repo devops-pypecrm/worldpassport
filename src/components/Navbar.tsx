@@ -1,137 +1,189 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, LogIn } from 'lucide-react';
+import { Menu, X, LogIn, ChevronDown, Video, Handshake, Globe2 } from 'lucide-react';
 import Logo from './Logo';
 import AdminLoginModal from './AdminLoginModal';
+import { destinations } from '@/lib/destinations';
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/overseas', label: 'Overseas' },
-  { href: '/b2b', label: 'B2B Portal' },
+  { href: '/overseas', label: 'Study Destinations', dropdown: true },
   { href: '/about', label: 'About Us' },
+  { href: '/b2b', label: 'Partner With Us' },
+  { href: '/contact', label: 'Contact Us' },
 ];
+
+function isActive(pathname: string, href: string) {
+  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+}
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [destOpen, setDestOpen] = useState(false);
+  const destRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => { setMobileOpen(false); setDestOpen(false); }, [pathname]);
+
+  useEffect(() => {
+    if (!destOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (destRef.current && !destRef.current.contains(e.target as Node)) setDestOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setDestOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
+  }, [destOpen]);
+
+  // On top of the blue hero the bar is blue with white text; once scrolled it turns white.
+  const solid = scrolled || mobileOpen;
+  const linkBase = solid ? 'text-ink hover:text-navy' : 'text-white/90 hover:text-white';
 
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'bg-white/90 backdrop-blur-2xl shadow-lg shadow-black/5 border-b border-gray-200/50'
-            : 'bg-white/20 backdrop-blur-md'
+        className={`sticky top-0 z-50 transition-colors duration-300 ${
+          solid ? 'bg-white shadow-[0_6px_24px_rgba(20,33,61,0.08)]' : 'bg-navy'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-28 flex items-center justify-between">
+        <div className="container-x flex h-[76px] items-center justify-between gap-4">
+          <Link href="/" aria-label="World Passport home"
+            className={`flex-shrink-0 rounded-xl px-3 py-1.5 transition-colors ${solid ? '' : 'bg-white shadow-sm'}`}>
+            <Logo size={40} />
+          </Link>
 
-            {/* Nav links — pill style */}
-            <nav className="hidden md:flex items-center">
-              <div className={`flex items-center gap-1 p-1.5 rounded-full transition-all duration-500 ${
-                scrolled ? 'bg-gray-100/80' : 'bg-white/15 backdrop-blur-sm'
-              }`}>
-                {links.map((link) => {
-                  const isActive = pathname === link.href;
-                  return (
-                    <Link key={link.href} href={link.href}
-                      className={`relative px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
-                        isActive
-                          ? scrolled ? 'text-white' : 'text-white'
-                          : scrolled ? 'text-gray-600 hover:text-gray-900' : 'text-gray-700 hover:text-gray-900'
-                      }`}>
-                      {isActive && (
-                        <div
-                          className="absolute inset-0 rounded-full"
-                          style={{ background: 'linear-gradient(135deg, #3B82F6, #2563EB)' }} />
+          <nav className="hidden xl:flex items-center gap-1" aria-label="Main">
+            {links.map((link) => {
+              const active = isActive(pathname, link.href);
+              if (link.dropdown) {
+                return (
+                  <div key={link.href} ref={destRef} className="relative"
+                    onMouseEnter={() => setDestOpen(true)} onMouseLeave={() => setDestOpen(false)}>
+                    <button
+                      onClick={() => setDestOpen((v) => !v)}
+                      aria-expanded={destOpen}
+                      aria-haspopup="true"
+                      className={`flex items-center gap-1 px-3 py-2 text-[15px] font-semibold transition-colors ${linkBase} ${active ? (solid ? '!text-navy' : '!text-white') : ''}`}
+                    >
+                      {link.label}
+                      <ChevronDown size={16} className={`transition-transform ${destOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {destOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute left-1/2 top-full w-[440px] -translate-x-1/2 pt-3"
+                        >
+                          <div className="rounded-2xl border border-cream-200 bg-white p-3 shadow-lift">
+                            <div className="grid grid-cols-2 gap-1">
+                              {destinations.map((d) => (
+                                <Link key={d.id} href={`/overseas?search=${encodeURIComponent(d.name)}`}
+                                  className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-navy-50">
+                                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-50 text-xs font-bold text-gold-dark">{d.code}</span>
+                                  <span>
+                                    <span className="block text-sm font-semibold text-ink">Study in {d.name}</span>
+                                    <span className="block text-xs text-ink-muted">{d.stats.unis} {d.stats.unis === '1' ? 'university' : 'universities'}</span>
+                                  </span>
+                                </Link>
+                              ))}
+                              <Link href="/overseas" className="flex items-center gap-3 rounded-xl bg-navy-50 px-3 py-2.5 hover:bg-navy-100">
+                                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-white"><Globe2 size={16} /></span>
+                                <span className="text-sm font-semibold text-navy">All destinations</span>
+                              </Link>
+                            </div>
+                          </div>
+                        </motion.div>
                       )}
-                      <span className="relative z-10">{link.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </nav>
+                    </AnimatePresence>
+                  </div>
+                );
+              }
+              return (
+                <Link key={link.href} href={link.href}
+                  className={`relative px-3 py-2 text-[15px] font-semibold transition-colors ${linkBase} ${active ? (solid ? '!text-navy' : '!text-white') : ''}`}>
+                  {link.label}
+                  {active && <span className={`absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full ${solid ? 'bg-navy' : 'bg-gold-light'}`} />}
+                </Link>
+              );
+            })}
+          </nav>
 
-            {/* Right side — Login + Logo */}
-            <div className="hidden md:flex items-center gap-5 flex-shrink-0">
-              <button
-                onClick={() => setLoginOpen(true)}
-                className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                  scrolled
-                    ? 'text-gray-600 hover:text-blue-600 hover:bg-blue-50 border border-gray-200'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-white/30 border border-gray-300/50'
-                }`}
-              >
-                <LogIn size={15} />
-                Login
-              </button>
-              <Link href="/" className="flex items-center">
-                <Logo size={56} />
-              </Link>
-            </div>
-
-            {/* Mobile */}
-            <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className={`md:hidden w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                scrolled ? 'bg-gray-100 text-gray-700' : 'bg-white/20 text-gray-700 border border-gray-200/50'
-              }`}
-            >
-              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          <div className="hidden xl:flex items-center gap-2.5">
+            <Link href="/b2b/login"
+              className={`btn !px-4 !py-2 border text-[13px] leading-tight ${solid ? 'border-navy/30 text-navy hover:bg-navy-50' : 'border-white text-white hover:bg-white/10'}`}>
+              <Handshake size={15} /> Partner Login
+            </Link>
+            <button onClick={() => setLoginOpen(true)} className="btn-accent !px-4 !py-2.5 text-[13px]">
+              <LogIn size={15} /> Login
             </button>
-            <Link href="/" className="flex items-center md:hidden flex-shrink-0">
-              <Logo size={48} />
+            <Link href="/contact" className={`btn !px-4 !py-2.5 text-[13px] ${solid ? 'bg-brand-50 text-brand hover:bg-brand-50/70' : 'bg-white text-brand hover:bg-brand-50'}`}>
+              <Video size={16} /> Book Free Counselling
             </Link>
           </div>
-        </div>
-      </header>
 
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-x-4 top-24 z-40 bg-white/95 backdrop-blur-2xl border border-gray-100 rounded-3xl p-6 flex flex-col gap-1.5 shadow-2xl"
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileOpen}
+            className={`xl:hidden flex h-11 w-11 items-center justify-center rounded-lg border ${solid ? 'border-cream-200 text-navy' : 'border-white/40 text-white'}`}
           >
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all ${
-                  pathname === link.href
-                    ? 'text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-md'
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-3 mt-2 border-t border-gray-100">
-              <button
-                onClick={() => { setMobileOpen(false); setLoginOpen(true); }}
-                className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
-              >
-                <LogIn size={15} /> Login
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
+
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="xl:hidden overflow-hidden border-t border-cream-200 bg-white"
+            >
+              <div className="container-x flex flex-col py-3">
+                {links.map((link) => (
+                  <Link key={link.href} href={link.href}
+                    className={`rounded-lg px-3 py-3 text-[15px] font-semibold ${
+                      isActive(pathname, link.href) ? 'bg-navy-50 text-navy' : 'text-ink hover:bg-cream'
+                    }`}>
+                    {link.label}
+                  </Link>
+                ))}
+                <div className="flex flex-wrap gap-2 px-3 pb-2 pt-1">
+                  {destinations.map((d) => (
+                    <Link key={d.id} href={`/overseas?search=${encodeURIComponent(d.name)}`} className="chip bg-gold-50 text-gold-dark">
+                      {d.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="mt-3 grid gap-2 border-t border-cream-200 pt-4 sm:grid-cols-3">
+                  <Link href="/contact" className="btn-accent"><Video size={16} /> Book Free Counselling</Link>
+                  <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="btn-outline">
+                    <LogIn size={15} /> Login
+                  </button>
+                  <Link href="/b2b/login" className="btn-outline"><Handshake size={15} /> Partner Login</Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
       <AdminLoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />
     </>

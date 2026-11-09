@@ -1,55 +1,46 @@
-'use client';
 import Link from 'next/link';
-import { Users } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Phone } from 'lucide-react';
 
-export default function CTASection() {
+interface CTASectionProps {
+  title?: string;
+  lead?: string;
+  className?: string;
+}
+
+export default function CTASection({
+  title = 'Book your free counselling session',
+  lead = 'Talk to a counsellor about your goals, your budget and the universities that fit. No commitment, no fees for the first session.',
+  className = '',
+}: CTASectionProps) {
   return (
-    <section className="px-4 sm:px-6 lg:px-8 py-8">
-      <div className="max-w-7xl mx-auto">
-        <div
-          className="relative rounded-3xl overflow-hidden px-8 sm:px-12 lg:px-16 py-16 sm:py-20"
-          style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&q=80&auto=format&fit=crop')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 via-gray-900/80 to-gray-900/60" />
+    <section className={`bg-white pb-16 sm:pb-20 lg:pb-24 ${className}`}>
+      <div className="container-x">
+        <div className="relative overflow-hidden rounded-3xl bg-navy px-6 py-12 sm:px-12 lg:px-16 lg:py-16">
+          <div aria-hidden="true" className="absolute -right-24 -top-24 h-72 w-72 rounded-full border-[28px] border-gold/15" />
+          <div aria-hidden="true" className="absolute -bottom-32 right-40 h-64 w-64 rounded-full border-[20px] border-white/5" />
 
-          <div className="relative z-10 max-w-lg">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium">
-                One Platform
-              </span>
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-medium">
-                100,001+ Programs
-              </span>
-            </div>
-
-            <h2 className="text-white font-bold text-3xl sm:text-4xl leading-tight mb-8">
-              Ready to Start Your<br />Journey?
-            </h2>
-
-            <div className="flex items-center gap-4">
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors"
-              >
-                Join for Free
-              </Link>
-
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 rounded-full bg-orange-400 border-2 border-gray-900 flex items-center justify-center">
-                    <Users size={12} className="text-white" />
-                  </div>
-                  <div className="w-8 h-8 rounded-full bg-emerald-400 border-2 border-gray-900 flex items-center justify-center text-white text-[10px] font-bold">
-                    34k
-                  </div>
-                </div>
-                <span className="text-white/70 text-xs">Students joined us</span>
+          <div className="relative grid items-center gap-10 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p className="eyebrow mb-4 !text-gold-light">Admissions open</p>
+              <h2 className="font-display text-3xl font-semibold leading-tight text-white sm:text-4xl">{title}</h2>
+              <p className="mt-4 max-w-xl text-white/70">{lead}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link href="/contact" className="btn-gold">Book a session <ArrowRight size={15} /></Link>
+                <a href="tel:+919205031277" className="btn-ghost-light"><Phone size={15} /> Call us</a>
               </div>
             </div>
+            <ul className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-white/85">
+              {[
+                'Personalised university shortlist',
+                'Fee, scholarship and budget planning',
+                'Application and visa timeline',
+                'Answers to all your questions',
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3">
+                  <CheckCircle2 size={17} className="flex-shrink-0 text-gold-light" /> {item}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

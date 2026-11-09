@@ -1,168 +1,155 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
-import AOSInit from '@/components/AOSInit';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import PageHero from '@/components/PageHero';
+import SectionHeading from '@/components/SectionHeading';
+import CTASection from '@/components/CTASection';
 import {
-  Heart, Shield, Globe, Award, Clock, CheckCircle,
-  ArrowRight, BookOpen, Target,
+  Heart, Shield, Globe, Clock, CheckCircle2, Award, MapPin, Building2, UserRound,
 } from 'lucide-react';
 
-const pillars = [
-  { icon: Heart,   title: 'Listen First',      color: '#DC2626', desc: "Every student's story is unique. We listen carefully before we advise — no cookie-cutter solutions." },
-  { icon: Globe,   title: 'Global Network',     color: '#2563EB', desc: '20+ partner universities across 15+ countries give you unmatched program options.' },
-  { icon: Shield,  title: 'Zero Hidden Fees',   color: '#2563EB', desc: 'Complete transparency. What we quote is exactly what you pay — no surprises, ever.' },
-  { icon: Clock,   title: 'Lifetime Support',   color: '#DC2626', desc: 'From first inquiry to graduation and beyond — our counsellors remain your trusted guides.' },
+const values = [
+  { icon: Heart, title: 'Listen first', desc: "Every student's story is different. We listen before we advise. No one-size-fits-all plans." },
+  { icon: Globe, title: 'Global network', desc: '20+ partner universities across 15+ countries give you real choice of programs and budgets.' },
+  { icon: Shield, title: 'Zero hidden fees', desc: 'What we quote is what you pay. Every cost is explained before you commit to anything.' },
+  { icon: Clock, title: 'Lifetime support', desc: 'From your first enquiry to graduation and beyond, your counsellor stays your point of contact.' },
 ];
 
-const offices = [
-  { city: 'Delhi (Noida)', country: 'India', flag: '🇮🇳', type: 'Headquarters', address: 'A-18, S1, Second Floor, Sector-59, Noida, UP-201301' },
-  { city: 'Dubai', country: 'UAE', flag: '🇦🇪', type: 'International Office', address: 'Office No 502, Al Fattan Plaza, Al Garhoud, UAE' },
-  { city: 'Edapally, Ernakulam', country: 'Kerala, India', flag: '🇮🇳', type: 'Regional Office', address: 'St George Forane Church Building, Palarivattam-Edappally Road, Ponekkara, Edappally, Kochi, Ernakulam, Kerala 682024' },
+const milestones = [
+  { val: '2015', label: 'Year founded' },
+  { val: '10,000+', label: 'Students guided' },
+  { val: '20+', label: 'Partner universities' },
+  { val: '15+', label: 'Countries covered' },
 ];
 
 const awards = [
-  { title: 'Most Trusted Education Agency',    year: '2023', body: 'Education Today Awards' },
+  { title: 'Most Trusted Education Agency', year: '2023', body: 'Education Today Awards' },
   { title: 'Best Overseas Counselling Service', year: '2022', body: 'Times Education' },
-  { title: 'ISO 9001:2015 Certified',           year: '2021', body: 'International Standards' },
-  { title: 'Top 10 Education Consultants',      year: '2020', body: 'India Education Summit' },
+  { title: 'ISO 9001:2015 Certified', year: '2021', body: 'International Standards' },
+  { title: 'Top 10 Education Consultants', year: '2020', body: 'India Education Summit' },
 ];
 
-const statItems = [
-  { val: '2015',    label: 'Year Founded',         color: '#2563EB' },
-  { val: '10,000+', label: 'Students Served',       color: '#DC2626' },
-  { val: '20+',     label: 'Partner Universities',  color: '#2563EB' },
-  { val: '15+',     label: 'Countries Covered',     color: '#DC2626' },
+const offices = [
+  { city: 'Noida, Delhi NCR', country: 'India', type: 'Headquarters', address: 'A-18, S1, Second Floor, Sector-59, Noida, UP-201301' },
+  { city: 'Kochi, Kerala', country: 'India', type: 'Regional Office', address: 'St George Forane Church Building, Palarivattam-Edappally Road, Ponekkara, Edappally, Kochi, Ernakulam, Kerala 682024' },
+  { city: 'Dubai', country: 'UAE', type: 'International Office', address: 'Office No 502, Al Fattan Plaza, Al Garhoud, Dubai, UAE' },
 ];
+
+interface Leader { _id?: string; name: string; role: string; bio?: string; image?: string }
+
+const fallbackLeaders: Leader[] = [
+  { name: 'Edwin C Benny', role: 'CEO', image: '/assets/team/edwin.jpeg', bio: "Visionary leader driving World Passport's mission to make international education accessible to every student." },
+  { name: 'Mujeeb T', role: 'Director', image: '/assets/team/mujeeb-t.jpg', bio: "Guiding strategic direction and partnerships to expand World Passport's global education network." },
+];
+
+function LeaderPhoto({ src, name }: { src?: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-navy-50 text-navy-200">
+        <UserRound size={72} aria-label={name} />
+      </div>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={name} loading="lazy"
+      className="absolute inset-0 h-full w-full object-cover object-center" onError={() => setFailed(true)} />
+  );
+}
 
 export default function AboutPage() {
+  const [leaders, setLeaders] = useState<Leader[]>(fallbackLeaders);
+
+  useEffect(() => {
+    fetch('/api/admin/leaders')
+      .then((r) => r.json())
+      .then((d) => { if (d.leaders?.length) setLeaders(d.leaders); })
+      .catch(() => {});
+  }, []);
+
   return (
     <PageWrapper>
-      <AOSInit />
       <Navbar />
 
-      {/* Hero — overseas-style full-bleed */}
-      <section className="relative min-h-[90vh] flex flex-col justify-end overflow-hidden bg-[#f0f4ff] -mt-28 pt-28">
-
-        {/* Full-bleed background image */}
-        <img
-          src="/assets/about.png"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-        {/* White overlay */}
-      <div className="absolute inset-0 bg-[#060C1F]/55 pointer-events-none" />
-        {/* Bottom fade into white */}
-        {/* <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, transparent 30%, rgba(240,244,255,0.80) 80%, #f0f4ff 100%)' }} /> */}
-        {/* Left fade so text is readable */}
-        {/* <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, rgba(240,244,255,0.70) 0%, transparent 60%)' }} /> */}
-
-        {/* Animated SVG accent lines */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-          {[
-            { d: 'M 0 300 Q 400 100 800 300', color: '#2563EB', delay: 0 },
-            { d: 'M 200 600 Q 600 250 1100 400', color: '#DC2626', delay: 1.0 },
-            { d: 'M 100 150 Q 500 400 900 200', color: '#3B82F6', delay: 0.5 },
-          ].map((p, i) => (
-            <motion.path key={i} d={p.d} fill="none" stroke={p.color} strokeWidth="1.5"
-              strokeDasharray="6 8" opacity={0.18}
-              initial={{ pathLength: 0, opacity: 0 }}
-              animate={{ pathLength: 1, opacity: 0.18 }}
-              transition={{ delay: p.delay, duration: 2.5, ease: 'easeInOut' }} />
-          ))}
-        </svg>
-
-        {/* Left-aligned content */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pb-14 pt-36">
-          <motion.div initial={{ opacity: 0, y: 25 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="max-w-2xl">
-
-            {/* Overline */}
-            <div className="flex items-center gap-2 mb-6 text-sm">
-              <BookOpen size={13} className="text-blue-400" />
-              <span className="text-white/80 text-xs font-semibold tracking-widest uppercase">Our Story</span>
-            </div>
-
-            <h1 className="font-display font-bold text-5xl md:text-7xl text-white mb-5 leading-tight">
-              A Decade of<br />
-              <span className="text-white">Changing Lives</span>
-            </h1>
-            <p className="text-white/80 text-lg md:text-xl max-w-xl mb-10 leading-relaxed">
-              Founded in 2015 with one belief: no student should have to choose between their dreams and their family. Today, 10,000+ lives later, that belief drives everything we do.
-            </p>
-
-            <div className="flex flex-wrap gap-3 mb-14">
-              <Link href="/contact">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  className="px-8 py-4 rounded-full font-semibold text-white flex items-center gap-2 shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #2563EB, #DC2626)' }}>
-                  Work With Us <ArrowRight size={16} />
-                </motion.button>
-              </Link>
-            </div>
-
-            {/* Stats bar */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.6 }}
-              className="flex flex-wrap items-center gap-px rounded-2xl overflow-hidden max-w-2xl"
-              style={{ border: '1px solid rgba(255,255,255,0.20)', background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)' }}>
-              {[
-                { val: '2015',    label: 'Founded',             color: '#60A5FA' },
-                { val: '10,000+', label: 'Students Served',     color: '#60A5FA' },
-                { val: '20+',     label: 'Partner Universities', color: '#F87171' },
-                { val: '15+',     label: 'Countries Covered',    color: '#F87171' },
-              ].map((s, i) => (
-                <div key={s.label}
-                  className={`flex-1 min-w-[100px] px-4 py-4 text-center ${i < 3 ? 'border-r border-white/15' : ''}`}>
-                  <div className="font-bold text-lg" style={{ color: s.color }}>{s.val}</div>
-                  <div className="text-white/50 text-xs mt-0.5">{s.label}</div>
-                </div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-14 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl p-8 border border-gray-100 shadow-lg">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {statItems.map((s, i) => (
-              <div key={s.label} data-aos="fade-up" data-aos-delay={i * 80}
-                className="bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md p-6 text-center cursor-default transition-all hover:-translate-y-1">
-                <div className="font-display font-bold text-3xl mb-1" style={{ color: s.color }}>{s.val}</div>
-                <div className="text-gray-500 text-sm">{s.label}</div>
+      <PageHero
+        crumbs={[{ label: 'About Us' }]}
+        eyebrow="About World Passport"
+        title="Helping Indian students reach the world's classrooms since 2015"
+        lead="We started with one belief: no student should have to give up on an international degree because the process felt too confusing, too costly or too risky. More than 10,000 students later, that belief still guides everything we do."
+        aside={
+          <div className="grid grid-cols-2 gap-4">
+            {milestones.map((m) => (
+              <div key={m.label} className="card p-6 text-center">
+                <p className="font-display text-3xl font-semibold text-navy">{m.val}</p>
+                <p className="mt-1 text-xs text-ink-muted">{m.label}</p>
               </div>
             ))}
           </div>
+        }
+      />
+
+      {/* Mission */}
+      <section className="section bg-white">
+        <div className="container-x grid gap-14 lg:grid-cols-2 lg:items-start">
+          <div>
+            <SectionHeading align="left" eyebrow="Our mission" title="Why we exist" />
+            <div className="mt-6 space-y-4 text-ink-muted leading-relaxed">
+              <p>
+                When we started, thousands of capable Indian students were giving up on studying abroad.
+                Not because they weren&apos;t qualified, but because the process felt opaque, expensive
+                and risky.
+              </p>
+              <p>
+                World Passport was built to change that. By partnering directly with 20+ universities
+                across 15+ countries, we removed the middlemen, eliminated hidden fees and created a
+                transparent pathway that any family can trust.
+              </p>
+            </div>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {[
+                'Direct university partnerships',
+                'Transparent fees from day one',
+                'Counsellors who studied abroad',
+                'Support from enquiry to graduation',
+              ].map((pt) => (
+                <li key={pt} className="flex items-start gap-2.5 text-sm text-ink">
+                  <CheckCircle2 size={17} className="mt-0.5 flex-shrink-0 text-gold" /> {pt}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <figure className="relative rounded-3xl bg-navy p-10 text-white sm:p-12">
+            <span aria-hidden="true" className="absolute -top-6 left-10 font-display text-[120px] leading-none text-gold">&ldquo;</span>
+            <blockquote className="relative font-display text-2xl leading-snug sm:text-[1.7rem]">
+              A good counsellor doesn&apos;t just get you an offer letter. They make sure it&apos;s the
+              right university, at a cost your family can plan for, with a clear path after graduation.
+            </blockquote>
+            <figcaption className="mt-8 flex items-center gap-3 border-t border-white/15 pt-6 text-sm text-white/70">
+              <Award size={20} className="text-gold-light" />
+              Recognised as India&apos;s Most Trusted Education Counselling Agency, 2023
+            </figcaption>
+          </figure>
         </div>
       </section>
 
-      {/* Pillars */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 shadow-lg">
-          <div className="mb-10" data-aos="fade-up">
-            <span className="badge badge-blue mb-4">Our Values</span>
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-gray-900 mb-3">
-              What We <span className="text-gradient">Stand For</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {pillars.map((p, i) => {
-              const Icon = p.icon;
+      {/* Values */}
+      <section className="section bg-cream">
+        <div className="container-x">
+          <SectionHeading eyebrow="Our values" title="What we stand for" />
+          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {values.map((v) => {
+              const Icon = v.icon;
               return (
-                <div key={p.title} data-aos="fade-up" data-aos-delay={i * 80}
-                  className="rounded-2xl p-6 bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all group text-center">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform"
-                    style={{ background: `${p.color}12`, border: `1px solid ${p.color}25` }}>
-                    <Icon size={24} style={{ color: p.color }} />
-                  </div>
-                  <h3 className="font-bold text-gray-900 text-base mb-2">{p.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
+                <div key={v.title} className="card p-7">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-50 text-gold-dark">
+                    <Icon size={22} />
+                  </span>
+                  <h3 className="mt-5 font-display text-lg font-semibold text-navy-900">{v.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">{v.desc}</p>
                 </div>
               );
             })}
@@ -170,140 +157,78 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Mission */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 shadow-lg">
-          <div className="grid lg:grid-cols-2 gap-12 items-start">
-            <div data-aos="fade-right">
-              <span className="badge badge-blue mb-4">Our Mission</span>
-              <h2 className="font-display font-bold text-4xl md:text-5xl text-gray-900 mb-5">
-                Why We <span className="text-gradient">Exist</span>
-              </h2>
-              <p className="text-gray-600 text-lg leading-relaxed mb-5">
-                When we started in 2015, thousands of brilliant Indian students were giving up on international education — not because they weren&apos;t qualified, but because the process felt too opaque, too expensive, and too risky.
-              </p>
-              <p className="text-gray-500 text-base leading-relaxed mb-6">
-                We built GEC to change that. By partnering directly with 20+ universities across 15+ countries, we removed the middlemen, eliminated hidden fees, and created a transparent pathway that any Indian family can trust.
-              </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Direct university partnerships — no agency markups',
-                  'Transparent fee structure from day one',
-                  'Counsellors who have studied abroad themselves',
-                  'Dedicated support from inquiry to graduation',
-                ].map(pt => (
-                  <li key={pt} className="flex items-start gap-2.5 text-gray-600 text-sm">
-                    <CheckCircle size={15} className="text-blue-600 mt-0.5 flex-shrink-0" /> {pt}
-                  </li>
-                ))}
-              </ul>
-              <div className="flex items-center gap-4 rounded-2xl p-4 bg-blue-50 border border-blue-100">
-                <Award size={28} className="text-blue-600 flex-shrink-0" />
-                <p className="text-gray-700 text-sm">
-                  Recognised as <strong className="text-blue-700">India&apos;s Most Trusted Education Counselling Agency</strong>, 2023
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4" data-aos="fade-left">
-              {awards.map((a, i) => (
-                <div key={a.title} data-aos="fade-left" data-aos-delay={i * 80}
-                  className="flex items-center gap-4 rounded-2xl p-5 bg-white border border-gray-100 shadow-sm hover:shadow-md hover:translate-x-1 transition-all cursor-default">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-50 border border-blue-100">
-                    <Award size={20} className="text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-gray-900 font-semibold text-sm">{a.title}</div>
-                    <div className="text-gray-400 text-xs mt-0.5">{a.body}</div>
-                  </div>
-                  <span className="text-blue-600 text-sm font-bold">{a.year}</span>
+      {/* Leadership */}
+      <section className="section bg-white">
+        <div className="container-x">
+          <SectionHeading eyebrow="Leadership" title="The people behind World Passport" />
+          <div className="mx-auto mt-14 grid max-w-4xl gap-8 sm:grid-cols-2">
+            {leaders.map((l) => (
+              <article key={l._id ?? l.name} className="card overflow-hidden">
+                <div className="relative aspect-square bg-navy-50">
+                  <LeaderPhoto src={l.image} name={l.name} />
                 </div>
-              ))}
-            </div>
+                <div className="p-7">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-dark">{l.role}</p>
+                  <h3 className="mt-1 font-display text-xl font-semibold text-navy-900">{l.name}</h3>
+                  {l.bio && <p className="mt-3 text-sm leading-relaxed text-ink-muted">{l.bio}</p>}
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* Recognition */}
+      <section className="section bg-cream">
+        <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:items-center">
+          <SectionHeading
+            align="left"
+            eyebrow="Recognition"
+            title="Trusted by students and the industry"
+            lead="Our work has been recognised by education bodies across India."
+          />
+          <ol className="relative space-y-4 border-l-2 border-gold/30 pl-8">
+            {awards.map((a) => (
+              <li key={a.title} className="card relative flex items-center justify-between gap-4 p-5">
+                <span aria-hidden="true" className="absolute -left-[41px] top-1/2 h-4 w-4 -translate-y-1/2 rounded-full border-4 border-cream bg-gold" />
+                <div>
+                  <p className="font-semibold text-ink">{a.title}</p>
+                  <p className="text-xs text-ink-muted">{a.body}</p>
+                </div>
+                <span className="font-display text-lg font-semibold text-navy">{a.year}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
       {/* Offices */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 shadow-lg">
-          <div className="mb-14" data-aos="fade-up">
-            <span className="badge badge-blue mb-4">Presence</span>
-            <h2 className="font-display font-bold text-4xl md:text-5xl text-gray-900 mb-3">
-              Where We <span className="text-gradient">Operate</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {offices.map((o, i) => (
-              <div key={o.city} data-aos="zoom-in" data-aos-delay={i * 80}
-                className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 cursor-default hover:shadow-md hover:-translate-y-1 transition-all">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="text-3xl">{o.flag}</div>
+      <section className="section bg-white">
+        <div className="container-x">
+          <SectionHeading eyebrow="Visit us" title="Our offices" lead="Meet a counsellor in person at any of our offices, or book an online session." />
+          <div className="mt-14 grid gap-5 md:grid-cols-3">
+            {offices.map((o) => (
+              <div key={o.city} className="card p-7">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-white">
+                    <Building2 size={20} />
+                  </span>
                   <div>
-                    <div className="font-display font-bold text-gray-900">{o.city}</div>
-                    <div className="text-gray-400 text-xs">{o.country}</div>
+                    <h3 className="font-display text-lg font-semibold text-navy-900">{o.city}</h3>
+                    <p className="text-xs text-ink-muted">{o.country}</p>
                   </div>
                 </div>
-                <span className="inline-block text-xs px-2.5 py-0.5 rounded-full font-medium bg-blue-50 text-blue-600 border border-blue-200 mb-3">
-                  {o.type}
-                </span>
-                {o.address && <p className="text-gray-500 text-xs leading-relaxed">{o.address}</p>}
+                <span className="chip mt-5 bg-gold-50 text-gold-dark">{o.type}</span>
+                <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-ink-muted">
+                  <MapPin size={15} className="mt-0.5 flex-shrink-0 text-ink-soft" /> {o.address}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div
-            data-aos="fade-up"
-            className="relative rounded-3xl p-10 md:p-14 text-center overflow-hidden bg-white"
-            style={{
-              border: '2px solid transparent',
-              backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #2563EB, #DC2626)',
-              backgroundOrigin: 'border-box',
-              backgroundClip: 'padding-box, border-box',
-            }}
-          >
-            {/* Subtle corner glows */}
-            <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-[0.07] pointer-events-none"
-              style={{ background: 'radial-gradient(circle, #2563EB, transparent)' }} />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-[0.07] pointer-events-none"
-              style={{ background: 'radial-gradient(circle, #DC2626, transparent)' }} />
-
-            <div className="relative z-10">
-              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                style={{ background: 'linear-gradient(135deg, #EFF6FF, #FEF2F2)', border: '1px solid #BFDBFE' }}>
-                <Target size={28} className="text-blue-600" />
-              </div>
-              <h2 className="font-display font-bold text-3xl md:text-5xl text-gray-900 mb-4">
-                Ready to Begin Your <span className="text-gradient">Journey?</span>
-              </h2>
-              <p className="text-gray-500 text-lg mb-10 max-w-xl mx-auto">
-                Join 10,000+ students who trusted GEC to guide them to world-class universities. Your story starts here.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/contact">
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    className="px-9 py-4 rounded-full font-semibold text-white shadow-md transition-all"
-                    style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)' }}>
-                    Book Free Consultation
-                  </motion.button>
-                </Link>
-                <Link href="/overseas">
-                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                    className="px-9 py-4 rounded-full font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-red-400 hover:text-red-600 transition-all">
-                    Explore Programs
-                  </motion.button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
+      <CTASection title="Ready to begin your journey?" lead="Join 10,000+ students who trusted World Passport to guide them to the right university. Your first session is free." />
       <Footer />
     </PageWrapper>
   );

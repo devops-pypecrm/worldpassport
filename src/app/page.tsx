@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Stats from '@/components/Stats';
+import Destinations from '@/components/Destinations';
 import Features from '@/components/Features';
 import HowItWorks from '@/components/HowItWorks';
 import TopUniversities from '@/components/TopUniversities';
@@ -16,6 +17,7 @@ export default function Home() {
       <Hero />
       <Stats />
       <Features />
+      <Destinations />
       <HowItWorks />
       <TopUniversities />
       <Testimonials />

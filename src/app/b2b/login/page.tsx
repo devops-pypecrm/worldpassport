@@ -39,30 +39,30 @@ export default function PartnerLoginPage() {
   };
 
   const inputClass =
-    'w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all text-sm';
+    'w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-navy-600 focus:ring-2 focus:ring-navy-600/15 transition-all text-sm';
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF3FA 100%)' }}>
+    <main className="min-h-screen bg-cream">
       <Navbar />
       <section className="px-4 sm:px-6 lg:px-8 py-10 min-h-[80vh] flex items-center">
         <div className="max-w-4xl mx-auto w-full">
           <Link href="/b2b" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-6 transition-colors">
-            <ArrowLeft size={15} /> Back to B2B Portal
+            <ArrowLeft size={15} /> Back to Partner With Us
           </Link>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            className="grid lg:grid-cols-5 rounded-[2rem] overflow-hidden shadow-2xl shadow-gray-200/60">
+            className="grid lg:grid-cols-5 rounded-3xl overflow-hidden shadow-2xl shadow-gray-200/60">
 
             {/* Left panel */}
             <div className="hidden lg:flex lg:col-span-2 relative p-10 flex-col justify-between"
-              style={{ background: 'linear-gradient(160deg, #1E293B 0%, #0B1120 100%)' }}>
+              style={{ background: '#1B2B5A' }}>
               <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '26px 26px' }} />
               <div className="relative z-10">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-6"
-                  style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+                  style={{ background: '#C2922F' }}>
                   <Handshake size={22} className="text-white" />
                 </div>
-                <h2 className="font-bold text-2xl text-white mb-3 leading-tight">Welcome Back, Partner</h2>
+                <h2 className="font-display font-semibold text-3xl text-white mb-3 leading-tight">Welcome Back, Partner</h2>
                 <p className="text-white/50 text-sm leading-relaxed">
                   Sign in to manage your student referrals and track your partnership with World Passport.
                 </p>
@@ -70,7 +70,7 @@ export default function PartnerLoginPage() {
               <div className="relative z-10 space-y-3 mt-10">
                 {['Live application status', 'Commission overview', 'Direct partner support'].map(item => (
                   <div key={item} className="flex items-center gap-2.5 text-white/70 text-sm">
-                    <CheckCircle size={15} className="text-emerald-400 flex-shrink-0" /> {item}
+                    <CheckCircle size={15} className="text-gold-light flex-shrink-0" /> {item}
                   </div>
                 ))}
               </div>
@@ -78,7 +78,7 @@ export default function PartnerLoginPage() {
 
             {/* Right panel — form */}
             <div className="lg:col-span-3 bg-white p-8 sm:p-12">
-              <h1 className="font-bold text-2xl text-gray-900 mb-1">Partner Login</h1>
+              <h1 className="font-display font-semibold text-3xl text-navy-900 mb-1">Partner Login</h1>
               <p className="text-gray-500 text-sm mb-6">Sign in to your World Passport partner account.</p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +96,7 @@ export default function PartnerLoginPage() {
                 {error && <p className="text-red-500 text-xs">{error}</p>}
                 <button type="submit" disabled={loading}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl text-white font-bold transition-all hover:scale-[1.01] shadow-lg disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #2563EB, #DC2626)' }}>
+                  style={{ background: '#1B2B5A' }}>
                   {loading ? <Loader size={16} className="animate-spin" /> : <LogIn size={16} />}
                   {loading ? 'Signing in...' : 'Sign In'}
                 </button>
@@ -104,7 +104,7 @@ export default function PartnerLoginPage() {
 
               <p className="text-center text-gray-400 text-xs mt-6">
                 Not a partner yet?{' '}
-                <Link href="/b2b#partner-form" className="text-blue-600 font-semibold hover:underline">Apply here</Link>
+                <Link href="/b2b#partner-form" className="text-navy font-semibold hover:underline">Apply here</Link>
               </p>
             </div>
           </motion.div>

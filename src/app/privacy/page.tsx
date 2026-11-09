@@ -1,9 +1,4 @@
-'use client';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import PageWrapper from '@/components/PageWrapper';
-import { motion } from 'framer-motion';
-import { Shield } from 'lucide-react';
+import LegalPage from '@/components/LegalPage';
 
 const sections = [
   {
@@ -37,35 +32,5 @@ const sections = [
 ];
 
 export default function PrivacyPage() {
-  return (
-    <PageWrapper>
-      <Navbar />
-      <section className="py-24">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 sm:p-10 border border-white/60">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-14">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-blue-50 border border-blue-200">
-                <Shield size={26} className="text-blue-600" />
-              </div>
-              <h1 className="font-display font-bold text-4xl md:text-5xl text-gray-900 mb-3">Privacy Policy</h1>
-              <p className="text-gray-500 text-sm">Last updated: January 2024</p>
-            </motion.div>
-
-            <div className="space-y-6">
-              {sections.map((s, i) => (
-                <motion.div key={s.title}
-                  initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06 }}
-                  className="bg-white/90 border border-gray-100 rounded-2xl shadow-sm p-6">
-                  <h2 className="font-display font-bold text-gray-900 mb-3">{s.title}</h2>
-                  <p className="text-gray-600 text-sm leading-relaxed">{s.body}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-      <Footer />
-    </PageWrapper>
-  );
+  return <LegalPage title="Privacy Policy" updated="January 2024" sections={sections} />;
 }

@@ -1,131 +1,102 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, GraduationCap, CalendarCheck, CheckCircle2, Sparkles } from 'lucide-react';
+import { destinations } from '@/lib/destinations';
+import SkylineArt from './SkylineArt';
 
-const images = [
-  '/assets/hero/london-bigben.jpg',
-  '/assets/hero/paris-eiffel.jpg',
-  '/assets/hero/LONDRA.jpeg',
-  '/assets/hero/rome-colosseum.jpg',
-  '/assets/hero/dubai-skyline.jpg',
-  '/assets/hero/sydney-opera.jpg',
-  '/assets/hero/rainy-london.jpeg',
-  '/assets/hero/one world tc tower.jpeg',
-];
+const levels = ["Bachelor's", "Master's", 'MBA', 'Diploma'];
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-  const [query, setQuery] = useState('');
   const router = useRouter();
+  const [country, setCountry] = useState('');
+  const [level, setLevel] = useState('');
 
-  const handleSearch = () => {
-    const q = query.trim();
-    if (q) {
-      router.push(`/overseas?search=${encodeURIComponent(q)}`);
-    } else {
-      router.push('/overseas');
-    }
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = country || level;
+    router.push(q ? `/overseas?search=${encodeURIComponent(q)}` : '/overseas');
   };
 
-  const goTo = useCallback((index: number) => {
-    if (transitioning) return;
-    setTransitioning(true);
-    setCurrent(index);
-    setTimeout(() => setTransitioning(false), 700);
-  }, [transitioning]);
-
-  const next = useCallback(() => {
-    goTo((current + 1) % images.length);
-  }, [current, goTo]);
-
-  const prev = useCallback(() => {
-    goTo((current - 1 + images.length) % images.length);
-  }, [current, goTo]);
-
-  useEffect(() => {
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [next]);
-
   return (
-    <section className="px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-      <div className="max-w-7xl mx-auto">
-        <div className="relative rounded-3xl overflow-hidden min-h-[420px] sm:min-h-[480px] flex items-center">
+    <section className="hero-blue">
+      <SkylineArt className="absolute bottom-10 left-1/2 w-[1100px] max-w-none -translate-x-1/2 text-white/[0.13] lg:left-[62%]" />
 
-          {images.map((img, i) => (
-            <div
-              key={img}
-              className="absolute inset-0 transition-opacity duration-700 ease-in-out"
-              style={{
-                opacity: i === current ? 1 : 0,
-                backgroundImage: `url('${img}')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-              }}
-            />
-          ))}
+      <div className="container-x relative grid items-center gap-12 pb-24 pt-10 sm:pb-28 lg:grid-cols-[1.15fr_1fr] lg:pb-32 lg:pt-14">
+        {/* Copy + course finder */}
+        <div>
+          <span className="inline-flex items-center gap-2 rounded-full bg-white/15 py-1 pl-1 pr-4 text-sm font-medium text-white">
+            <span className="rounded-full bg-gold px-2.5 py-0.5 text-xs font-bold">20+</span>
+            Partner universities worldwide
+          </span>
+          <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.15] tracking-tight sm:text-5xl lg:text-[3.3rem]">
+            Your journey to a world-class degree starts here
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-white/85 sm:text-lg">
+            We match your academic background and budget to accredited universities, then handle
+            applications, scholarships, visas and arrival, so you can focus on your studies.
+          </p>
 
-          <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/30 to-transparent" />
+          <form onSubmit={handleSearch} className="mt-8 grid gap-2.5 rounded-2xl bg-white p-2.5 shadow-lift sm:grid-cols-[1fr_1fr_auto]">
+            <label className="sr-only" htmlFor="hero-country">Destination</label>
+            <select id="hero-country" value={country} onChange={(e) => setCountry(e.target.value)}
+              className="field !border-transparent !bg-cream">
+              <option value="">Any destination</option>
+              {destinations.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}
+            </select>
+            <label className="sr-only" htmlFor="hero-level">Study level</label>
+            <select id="hero-level" value={level} onChange={(e) => setLevel(e.target.value)}
+              className="field !border-transparent !bg-cream">
+              <option value="">Any study level</option>
+              {levels.map((l) => <option key={l}>{l}</option>)}
+            </select>
+            <button type="submit" className="btn-accent">
+              <Search size={16} /> Start Your Journey
+            </button>
+          </form>
 
-          <div className="relative z-10 px-8 sm:px-12 lg:px-16 py-12 max-w-2xl">
-            <div className="flex items-center gap-2.5 mb-6">
-              <span className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-bold">
-                20+
-              </span>
-              <span className="text-white/90 text-sm font-medium">
-                Partner Universities Worldwide.
-              </span>
-            </div>
-
-            <h1 className="text-white font-bold text-3xl sm:text-4xl lg:text-5xl leading-tight mb-4">
-              Find Your Perfect<br />University Abroad
-            </h1>
-
-            <p className="text-white/70 text-base sm:text-lg mb-8 max-w-lg">
-              Guided by your background, matched to your goals
-            </p>
-
-            <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="flex items-center bg-white rounded-full overflow-hidden max-w-lg shadow-lg">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Select your country..."
-                className="flex-1 px-5 py-3.5 text-sm text-gray-700 placeholder-gray-400 bg-transparent outline-none"
-              />
-              <button type="submit" className="flex items-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors flex-shrink-0 m-1 rounded-full">
-                <Search size={16} />
-                Search
-              </button>
-            </form>
-          </div>
-
-          <button
-            onClick={prev}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
-
-          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {images.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  i === current ? 'bg-white w-6' : 'bg-white/40 w-2'
-                }`}
-              />
+          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/85">
+            {['Free first consultation', 'Accredited universities only', 'No hidden fees'].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <CheckCircle2 size={16} className="text-gold-light" /> {t}
+              </li>
             ))}
+          </ul>
+        </div>
+
+        {/* Student portrait in a circle with an orange accent */}
+        <div className="relative mx-auto w-full max-w-[460px]">
+          <div aria-hidden="true" className="absolute -right-4 top-6 aspect-square w-[88%] rounded-full bg-brand" />
+          <div aria-hidden="true" className="absolute -left-6 bottom-10 h-24 w-24 rounded-full border-[10px] border-white/20" />
+          <div className="relative aspect-square w-[92%] overflow-hidden rounded-full border-[8px] border-white bg-white shadow-lift">
+            <Image
+              src="/assets/hero-students.png"
+              alt="Graduate holding her degree"
+              fill
+              priority
+              sizes="(min-width: 1024px) 440px, 90vw"
+              className="object-cover object-[88%_35%] scale-[1.2] origin-[80%_40%]"
+            />
           </div>
+
+          <div className="absolute -left-3 top-10 hidden sm:flex animate-floaty items-center gap-3 rounded-2xl bg-white p-3 pr-5 text-ink shadow-lift">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-navy-50 text-navy"><GraduationCap size={20} /></span>
+            <div>
+              <p className="text-lg font-bold leading-none text-navy-900">20+</p>
+              <p className="text-xs text-ink-muted">Partner universities</p>
+            </div>
+          </div>
+          <div className="absolute -right-2 bottom-6 hidden sm:flex animate-floaty items-center gap-3 rounded-2xl bg-white p-3 pr-5 text-ink shadow-lift [animation-delay:1.5s]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold-50 text-gold-dark"><CalendarCheck size={20} /></span>
+            <div>
+              <p className="text-sm font-semibold text-navy-900">Free 1:1 counselling</p>
+              <p className="text-xs text-ink-muted">Mon–Sat, 9am–7pm IST</p>
+            </div>
+          </div>
+          <span className="absolute right-6 top-0 hidden sm:flex h-11 w-11 items-center justify-center rounded-full bg-white text-gold shadow-lift">
+            <Sparkles size={18} />
+          </span>
         </div>
       </div>
     </section>

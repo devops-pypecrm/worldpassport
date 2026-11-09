@@ -8,63 +8,79 @@ const config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#2563EB',
-          dark: '#1D4ED8',
-          light: '#3B82F6',
-        },
-        accent: {
-          DEFAULT: '#DC2626',
-          dark: '#B91C1C',
-          light: '#EF4444',
-        },
-        surface: {
-          DEFAULT: '#FFFFFF',
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-        },
+        // World Passport brand palette — taken from the logo
+        // Primary: logo navy (hero bands, navbar, primary buttons, headings)
         navy: {
-          DEFAULT: '#0F172A',
-          50: '#1E293B',
-          100: '#334155',
-          200: '#475569',
-          300: '#64748B',
+          DEFAULT: '#1F2F5F',
+          950: '#0D1530',
+          900: '#16213F',
+          800: '#182651',
+          700: '#2A3D75',
+          600: '#34498A',
+          500: '#5468A8',
+          200: '#C7CFE6',
+          100: '#E3E8F4',
+          50: '#F1F4FA',
         },
+        // Logo red — call-to-action buttons and emphasis
+        brand: {
+          DEFAULT: '#E01F26',
+          dark: '#BB1A20',
+          light: '#EF5A5F',
+          50: '#FDECEC',
+        },
+        // Amber — small highlights only (stars, chips, badges)
+        gold: {
+          DEFAULT: '#E8A317',
+          dark: '#A8740A',
+          light: '#F6C95C',
+          100: '#FBEACB',
+          50: '#FDF6E7',
+        },
+        // Soft neutral section backgrounds
+        cream: {
+          DEFAULT: '#F7F8FB',
+          100: '#EFF1F7',
+          200: '#E3E7F0',
+        },
+        // Section tints derived from the brand colours
+        pastel: {
+          pink: '#FBEDEE',
+          peach: '#F8F2E7',
+          sky: '#EAEFF8',
+          lavender: '#EFEDF7',
+          mint: '#E8F4F0',
+        },
+        ink: {
+          DEFAULT: '#1D2233',
+          muted: '#5A6175',
+          soft: '#8B92A5',
+        },
+        primary: { DEFAULT: '#1F2F5F', dark: '#182651', light: '#34498A' },
+        accent: { DEFAULT: '#E01F26', dark: '#BB1A20', light: '#EF5A5F' },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-space-grotesk)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-sans)', 'system-ui', 'sans-serif'],
       },
-      animation: {
-        'float': 'float 6s ease-in-out infinite',
-        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'spin-slow': 'spin 20s linear infinite',
-        'marquee': 'marquee 30s linear infinite',
-        'marquee2': 'marquee2 30s linear infinite',
-        'shimmer': 'shimmer 3s linear infinite',
+      boxShadow: {
+        card: '0 2px 6px rgba(22,33,63,0.04), 0 8px 24px rgba(22,33,63,0.06)',
+        lift: '0 4px 10px rgba(22,33,63,0.06), 0 20px 44px rgba(22,33,63,0.12)',
+        cta: '0 8px 20px rgba(224,31,38,0.28)',
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-20px)' },
-        },
         marquee: {
-          '0%': { transform: 'translateX(0%)' },
-          '100%': { transform: 'translateX(-100%)' },
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
-        marquee2: {
-          '0%': { transform: 'translateX(100%)' },
-          '100%': { transform: 'translateX(0%)' },
-        },
-        shimmer: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
+        floaty: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-8px)' },
         },
       },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+      animation: {
+        marquee: 'marquee 40s linear infinite',
+        floaty: 'floaty 4s ease-in-out infinite',
       },
     },
   },

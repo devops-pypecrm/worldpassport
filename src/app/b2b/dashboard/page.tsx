@@ -36,10 +36,10 @@ export default function PartnerDashboardPage() {
   };
 
   if (partner === undefined) return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF3FA 100%)' }}>
+    <main className="min-h-screen bg-cream">
       <Navbar />
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader size={28} className="animate-spin text-blue-500" />
+        <Loader size={28} className="animate-spin text-navy" />
       </div>
       <Footer />
     </main>
@@ -48,25 +48,25 @@ export default function PartnerDashboardPage() {
   if (!partner) return null;
 
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #F8FAFC 0%, #EFF3FA 100%)' }}>
+    <main className="min-h-screen bg-cream">
       <Navbar />
 
       {/* Header banner */}
       <section className="px-4 sm:px-6 lg:px-8 pt-6">
         <div className="max-w-6xl mx-auto">
-          <div className="relative rounded-[2rem] overflow-hidden px-8 py-10 sm:py-12"
-            style={{ background: 'linear-gradient(135deg, #0B1120 0%, #16213E 55%, #1E1B4B 100%)' }}>
+          <div className="relative rounded-3xl overflow-hidden px-8 py-10 sm:py-12"
+            style={{ background: '#1B2B5A' }}>
             <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '26px 26px' }} />
             <div className="absolute top-[-30%] right-[-5%] w-72 h-72 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #3B82F6, transparent 70%)' }} />
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
               className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #3B82F6, #6366F1)' }}>
+                  style={{ background: '#C2922F' }}>
                   <Handshake size={22} className="text-white" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-2xl sm:text-3xl text-white">Welcome, {partner.name}</h1>
+                  <h1 className="font-display font-semibold text-2xl sm:text-3xl text-white">Welcome, {partner.name}</h1>
                   <p className="text-white/50 text-sm flex items-center gap-1.5 mt-1">
                     <Building2 size={14} /> {partner.organization}
                   </p>
@@ -134,8 +134,8 @@ export default function PartnerDashboardPage() {
                   );
                 })}
               </div>
-              <div className="rounded-2xl p-5 bg-blue-50 border border-blue-100 text-center">
-                <p className="text-blue-700 text-sm font-medium">
+              <div className="rounded-2xl p-5 bg-gold-50 border border-gold/30 text-center">
+                <p className="text-navy text-sm font-medium">
                   Student referral and application tracking tools are coming soon. Your dedicated partner
                   manager will reach out to help you submit your first students in the meantime.
                 </p>

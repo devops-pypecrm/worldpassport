@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_EMAIL = 'admin@worldpassport.com';
-const ADMIN_PASSWORD = 'Admin@2024';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(req: NextRequest) {
   try {
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+      return NextResponse.json({ error: 'Admin login is not configured.' }, { status: 500 });
+    }
+
     const body = await req.json();
     const { email, password } = body;
 
