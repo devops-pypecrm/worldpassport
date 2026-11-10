@@ -1,5 +1,5 @@
 import connectDB from '@/lib/mongodb';
-import { Contact, Partner } from '@/lib/models';
+import { Contact, Partner, Lead } from '@/lib/models';
 
 /**
  * Enquiries = every lead submitted through a form on the website.
@@ -7,7 +7,7 @@ import { Contact, Partner } from '@/lib/models';
  * combines them into one list so the admin panel can show and export all leads together.
  */
 
-export const ENQUIRY_SOURCES = ['Contact form', 'Partner application'] as const;
+export const ENQUIRY_SOURCES = ['Website popup', 'Contact form', 'Partner application'] as const;
 export type EnquirySource = (typeof ENQUIRY_SOURCES)[number];
 
 export interface Enquiry {
@@ -36,16 +36,23 @@ export async function getEnquiries({ source, q }: EnquiryFilters = {}): Promise<
   await connectDB();
   const wantContact = !source || source === 'Contact form';
   const wantPartner = !source || source === 'Partner application';
+  const wantLead = !source || source === 'Website popup';
 
-  const [contacts, partners] = await Promise.all([
+  const [contacts, partners, leads] = await Promise.all([
     wantContact ? Contact.find({}).sort({ createdAt: -1 }).lean<Doc[]>() : Promise.resolve([] as Doc[]),
     // Never expose legacy password fields
     wantPartner
       ? Partner.find({}).select('-passwordHash -passwordSalt -sessionToken -sessionExpires').sort({ createdAt: -1 }).lean<Doc[]>()
       : Promise.resolve([] as Doc[]),
+    wantLead ? Lead.find({}).sort({ createdAt: -1 }).lean<Doc[]>() : Promise.resolve([] as Doc[]),
   ]);
 
   const rows: Enquiry[] = [
+    ...leads.map((l) => ({
+      _id: String(l._id), source: 'Website popup' as const,
+      name: s(l.name), email: s(l.email), phone: s(l.phone), organization: '',
+      subject: [s(l.destination), s(l.level)].filter(Boolean).join(' · '), message: s(l.message), status: '', createdAt: iso(l.createdAt),
+    })),
     ...contacts.map((c) => ({
       _id: String(c._id), source: 'Contact form' as const,
       name: s(c.name), email: s(c.email), phone: s(c.phone), organization: '',

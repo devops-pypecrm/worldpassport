@@ -107,6 +107,7 @@ export default function AdminDashboard() {
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [partners, setPartners] = useState<PartnerEntry[]>([]);
   const [destinations, setDestinations] = useState<DestinationEntry[]>([]);
+  const [enquiryCount, setEnquiryCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const [modal, setModal] = useState<string | null>(null);
@@ -129,7 +130,7 @@ export default function AdminDashboard() {
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [c, u, co, su, sc, l, p, d] = await Promise.all([
+      const [c, u, co, su, sc, l, p, d, enq] = await Promise.all([
         fetch('/api/contact').then(r => r.json()),
         fetch('/api/admin/universities').then(r => r.json()),
         fetch('/api/admin/courses').then(r => r.json()),
@@ -138,6 +139,7 @@ export default function AdminDashboard() {
         fetch('/api/admin/leaders').then(r => r.json()),
         fetch('/api/admin/partners').then(r => r.json()),
         fetch('/api/admin/destinations').then(r => r.json()),
+        fetch('/api/admin/enquiries').then(r => r.json()).catch(() => ({})),
       ]);
       setContacts(c.contacts || []);
       setUniversities(u.universities || []);
@@ -147,6 +149,7 @@ export default function AdminDashboard() {
       setLeaders(l.leaders || []);
       setPartners(p.partners || []);
       setDestinations(d.destinations || []);
+      setEnquiryCount((enq.enquiries || []).length);
     } finally { setLoading(false); }
   }, []);
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -415,7 +418,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={<Inbox size={20} />} label="Enquiries" value={loading ? '—' : contacts.length + partners.length} color="linear-gradient(135deg,#16A34A,#15803D)" onClick={() => setActiveTab('enquiries')} />
+                <StatCard icon={<Inbox size={20} />} label="Enquiries" value={loading ? '—' : enquiryCount} color="linear-gradient(135deg,#16A34A,#15803D)" onClick={() => setActiveTab('enquiries')} />
                 <StatCard icon={<MapPin size={20} />} label="Destinations" value={loading ? '—' : destinations.length} color="linear-gradient(135deg,#1F2F5F,#34498A)" onClick={() => setActiveTab('destinations')} />
                 <StatCard icon={<GraduationCap size={20} />} label="Universities" value={loading ? '—' : universities.length} color="linear-gradient(135deg,#6D28D9,#7C3AED)" onClick={() => setActiveTab('universities')} />
                 <StatCard icon={<BookOpen size={20} />} label="Courses" value={loading ? '—' : courses.length} color="linear-gradient(135deg,#0EA5E9,#2563EB)" onClick={() => setActiveTab('courses')} />

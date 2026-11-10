@@ -85,6 +85,19 @@ const PartnerSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Leads captured by the website's enquiry popup (shown in Admin -> Enquiry)
+const LeadSchema = new Schema({
+  name: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true, lowercase: true },
+  phone: { type: String, required: true, trim: true },
+  destination: { type: String, trim: true },
+  level: { type: String, trim: true },
+  message: { type: String, trim: true },
+  source: { type: String, default: 'Website popup' },
+  page: { type: String },
+  createdAt: { type: Date, default: Date.now },
+});
+
 // Study destinations (navbar dropdown, home page, Study Destinations page). `order` controls display position.
 const DestinationSchema = new Schema({
   name: { type: String, required: true, trim: true },
@@ -122,5 +135,6 @@ export const Course         = mongoose.models.Course         || mongoose.model('
 export const SkillUniversity = mongoose.models.SkillUniversity || mongoose.model('SkillUniversity', SkillUniversitySchema);
 export const SkillCourse    = mongoose.models.SkillCourse    || mongoose.model('SkillCourse',    SkillCourseSchema);
 export const Partner        = mongoose.models.Partner        || mongoose.model('Partner',        PartnerSchema);
+export const Lead           = mongoose.models.Lead           || mongoose.model('Lead',           LeadSchema);
 export const Destination    = mongoose.models.Destination    || mongoose.model('Destination',    DestinationSchema);
 export const Leader         = mongoose.models.Leader         || mongoose.model('Leader',         LeaderSchema);

@@ -3,9 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Loader2, RefreshCw, Search, Inbox, ChevronDown } from 'lucide-react';
 import type { Enquiry } from '@/lib/enquiries';
 
-const SOURCES = ['Contact form', 'Partner application'];
+const SOURCES = ['Website popup', 'Contact form', 'Partner application'];
 
 const sourceStyle: Record<string, string> = {
+  'Website popup': 'bg-violet-50 text-violet-600',
   'Contact form': 'bg-blue-50 text-blue-600',
   'Partner application': 'bg-emerald-50 text-emerald-600',
 };
