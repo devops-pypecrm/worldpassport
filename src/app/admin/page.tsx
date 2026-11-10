@@ -1,11 +1,12 @@
 'use client';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import EnquiriesPanel from '@/components/admin/EnquiriesPanel';
 import {
   Plus, Trash2, Loader2, X, LayoutDashboard, GraduationCap,
   BookOpen, Mail, LogOut, ChevronRight, Globe, ExternalLink, Pencil,
   CheckCircle2, AlertCircle, Building2, Users, Award, Handshake, Check,
-  MapPin, GripVertical, ArrowUp, ArrowDown,
+  MapPin, GripVertical, ArrowUp, ArrowDown, Inbox,
 } from 'lucide-react';
 
 type ToastType = 'success' | 'error';
@@ -49,7 +50,7 @@ interface DestinationEntry {
 }
 interface PartnerEntry { _id: string; name: string; organization: string; email: string; phone?: string; message?: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; }
 
-type Tab = 'dashboard' | 'destinations' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
+type Tab = 'dashboard' | 'enquiries' | 'destinations' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
 
 const EMPTY_UNI = { name: '', country: '', city: '', website: '', ranking: '', image: '', description: '' };
 const EMPTY_COURSE = { title: '', university: '', country: '', level: "Master's", duration: '', tuitionFee: '', intake: '', description: '' };
@@ -347,6 +348,7 @@ export default function AdminDashboard() {
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+    { id: 'enquiries', label: 'Enquiry', icon: <Inbox size={18} /> },
     { id: 'destinations', label: 'Destinations', icon: <MapPin size={18} /> },
     { id: 'universities', label: 'Universities', icon: <GraduationCap size={18} /> },
     { id: 'courses', label: 'Courses', icon: <BookOpen size={18} /> },
@@ -413,6 +415,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard icon={<Inbox size={20} />} label="Enquiries" value={loading ? '—' : contacts.length + partners.length} color="linear-gradient(135deg,#16A34A,#15803D)" onClick={() => setActiveTab('enquiries')} />
                 <StatCard icon={<MapPin size={20} />} label="Destinations" value={loading ? '—' : destinations.length} color="linear-gradient(135deg,#1F2F5F,#34498A)" onClick={() => setActiveTab('destinations')} />
                 <StatCard icon={<GraduationCap size={20} />} label="Universities" value={loading ? '—' : universities.length} color="linear-gradient(135deg,#6D28D9,#7C3AED)" onClick={() => setActiveTab('universities')} />
                 <StatCard icon={<BookOpen size={20} />} label="Courses" value={loading ? '—' : courses.length} color="linear-gradient(135deg,#0EA5E9,#2563EB)" onClick={() => setActiveTab('courses')} />
@@ -424,6 +427,9 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* ENQUIRIES (all website leads) */}
+          {activeTab === 'enquiries' && <EnquiriesPanel onError={(m) => showToast(m, 'error')} />}
 
           {/* DESTINATIONS */}
           {activeTab === 'destinations' && (
