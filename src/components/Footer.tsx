@@ -1,6 +1,8 @@
+'use client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
+import { useDestinations } from '@/lib/useDestinations';
 
 const columns = [
   {
@@ -13,27 +15,26 @@ const columns = [
       { label: 'Contact', href: '/contact' },
     ],
   },
-  {
-    title: 'Destinations',
-    links: [
-      { label: 'Albania', href: '/overseas?search=albania' },
-      { label: 'Malta', href: '/overseas?search=malta' },
-      { label: 'Malaysia', href: '/overseas?search=malaysia' },
-      { label: 'Mauritius', href: '/overseas?search=mauritius' },
-      { label: 'Montenegro', href: '/overseas?search=montenegro' },
-    ],
-  },
+  // Destinations column is filled from the database (see Footer below)
   {
     title: 'Legal',
     links: [
       { label: 'Privacy Policy', href: '/privacy' },
       { label: 'Terms & Conditions', href: '/terms' },
-      { label: 'Partner Login', href: '/b2b/login' },
     ],
   },
 ];
 
 export default function Footer() {
+  const { destinations } = useDestinations();
+  const cols = [
+    columns[0],
+    {
+      title: 'Destinations',
+      links: destinations.map((d) => ({ label: d.name, href: `/overseas?search=${encodeURIComponent(d.name)}` })),
+    },
+    ...columns.slice(1),
+  ];
   return (
     <footer className="bg-navy-950 text-white/70">
       <div className="container-x py-14 lg:py-16">
@@ -54,7 +55,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {columns.map((col) => (
+          {cols.map((col) => (
             <div key={col.title}>
               <h4 className="mb-4 font-display text-base font-semibold text-white">{col.title}</h4>
               <ul className="space-y-2.5 text-sm">

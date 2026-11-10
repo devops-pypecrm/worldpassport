@@ -1,6 +1,7 @@
+'use client';
 import Link from 'next/link';
 import { ChevronRight, Building2, Wallet, Landmark, MapPin, GraduationCap } from 'lucide-react';
-import { destinations } from '@/lib/destinations';
+import { useDestinations, countWord, universityLabel } from '@/lib/useDestinations';
 
 const collage = [
   { src: '/assets/page-bg-uni.jpg', alt: 'University campus building', icon: Landmark, cls: 'left-[34%] top-0 w-[46%] h-[46%]', badge: '-right-3 -top-3' },
@@ -11,6 +12,8 @@ const collage = [
 const tones = ['bg-pastel-pink', 'bg-pastel-peach', 'bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint'];
 
 export default function Destinations() {
+  const { destinations, loading } = useDestinations();
+  const count = countWord(destinations.length);
   return (
     <section className="section bg-white">
       <div className="container-x">
@@ -32,10 +35,12 @@ export default function Destinations() {
           </div>
 
           <div>
-            <h2 className="font-display text-3xl font-semibold text-navy-900 sm:text-[2.4rem]">Five Countries, Endless Possibilities</h2>
+            <h2 className="font-display text-3xl font-semibold text-navy-900 sm:text-[2.4rem]">
+              {loading ? 'Study Destinations' : `${count} ${destinations.length === 1 ? 'Country' : 'Countries'}`}, Endless Possibilities
+            </h2>
             <p className="mt-4 text-lg font-medium text-ink">Your campus could be anywhere.</p>
             <p className="mt-3 max-w-lg text-ink-muted">
-              Choose from accredited universities in five countries picked for recognised degrees,
+              Choose from accredited universities in {loading ? 'our partner' : count.toLowerCase()} {destinations.length === 1 ? 'country' : 'countries'} picked for recognised degrees,
               English-taught programs and tuition that families can plan for.
             </p>
             <Link href="/overseas" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-brand transition-all hover:gap-2">
@@ -45,18 +50,19 @@ export default function Destinations() {
         </div>
 
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {loading && [0, 1, 2, 3, 4].map((i) => <div key={i} aria-hidden="true" className="h-60 animate-pulse rounded-2xl bg-cream" />)}
           {destinations.map((d, i) => (
             <Link key={d.id} href={`/overseas?search=${encodeURIComponent(d.name)}`}
               className={`group rounded-2xl ${tones[i % tones.length]} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift`}>
               <div className="flex items-center justify-between">
                 <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xs font-bold text-navy shadow-card">{d.code}</span>
-                <span className="chip bg-white/70 text-ink">{d.tag}</span>
+                {d.tag && <span className="chip bg-white/70 text-ink">{d.tag}</span>}
               </div>
               <h3 className="mt-5 text-xl font-semibold text-navy-900">{d.name}</h3>
               <p className="mt-1 text-sm text-ink-muted">{d.tagline}</p>
               <div className="mt-4 space-y-1.5 text-sm text-ink">
-                <p className="flex items-center gap-2"><Building2 size={14} className="text-navy" /> {d.stats.unis} {d.stats.unis === '1' ? 'university' : 'universities'}</p>
-                <p className="flex items-center gap-2"><Wallet size={14} className="text-navy" /> {d.stats.avgCost}</p>
+                {d.stats.unis && <p className="flex items-center gap-2"><Building2 size={14} className="text-navy" /> {universityLabel(d.stats.unis)}</p>}
+                {d.stats.avgCost && <p className="flex items-center gap-2"><Wallet size={14} className="text-navy" /> {d.stats.avgCost}</p>}
               </div>
               <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand">
                 Explore <ChevronRight size={15} className="transition-transform group-hover:translate-x-1" />

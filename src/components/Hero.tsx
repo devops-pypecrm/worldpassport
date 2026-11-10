@@ -1,22 +1,38 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Search, GraduationCap, CalendarCheck, CheckCircle2, Sparkles } from 'lucide-react';
-import { destinations } from '@/lib/destinations';
+import { useDestinations } from '@/lib/useDestinations';
+import { Program, PROGRAM_LEVELS, buildProgramsUrl, fetchPrograms, uniqueValues } from '@/lib/programs';
 import SkylineArt from './SkylineArt';
-
-const levels = ["Bachelor's", "Master's", 'MBA', 'Diploma'];
 
 export default function Hero() {
   const router = useRouter();
   const [country, setCountry] = useState('');
   const [level, setLevel] = useState('');
+  const [program, setProgram] = useState('');
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programsLoading, setProgramsLoading] = useState(true);
+  const { destinations } = useDestinations();
+
+  // Programs come from the admin panel (Courses collection)
+  useEffect(() => {
+    fetchPrograms()
+      .then(setPrograms)
+      .catch(() => setPrograms([]))
+      .finally(() => setProgramsLoading(false));
+  }, []);
+
+  const programOptions = useMemo(() => uniqueValues(programs.map((p) => p.title)), [programs]);
+  const countryOptions = useMemo(
+    () => uniqueValues([...destinations.map((d) => d.name), ...programs.map((p) => p.country)]),
+    [destinations, programs],
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const q = country || level;
-    router.push(q ? `/overseas?search=${encodeURIComponent(q)}` : '/overseas');
+    router.push(buildProgramsUrl({ program, country, level }));
   };
 
   return (
@@ -39,17 +55,26 @@ export default function Hero() {
           </p>
 
           <form onSubmit={handleSearch} className="mt-8 grid gap-2.5 rounded-2xl bg-white p-2.5 shadow-lift sm:grid-cols-[1fr_1fr_auto]">
+            <label className="sr-only" htmlFor="hero-program">Program</label>
+            <select id="hero-program" value={program} onChange={(e) => setProgram(e.target.value)}
+              disabled={programsLoading}
+              className="field !border-transparent !bg-cream sm:col-span-3">
+              <option value="">
+                {programsLoading ? 'Loading programs…' : programOptions.length ? 'All programs' : 'All programs (none listed yet)'}
+              </option>
+              {programOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
             <label className="sr-only" htmlFor="hero-country">Destination</label>
             <select id="hero-country" value={country} onChange={(e) => setCountry(e.target.value)}
               className="field !border-transparent !bg-cream">
               <option value="">Any destination</option>
-              {destinations.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}
+              {countryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <label className="sr-only" htmlFor="hero-level">Study level</label>
             <select id="hero-level" value={level} onChange={(e) => setLevel(e.target.value)}
               className="field !border-transparent !bg-cream">
               <option value="">Any study level</option>
-              {levels.map((l) => <option key={l}>{l}</option>)}
+              {PROGRAM_LEVELS.map((l) => <option key={l}>{l}</option>)}
             </select>
             <button type="submit" className="btn-accent">
               <Search size={16} /> Start Your Journey

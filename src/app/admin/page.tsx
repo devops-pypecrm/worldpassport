@@ -5,6 +5,7 @@ import {
   Plus, Trash2, Loader2, X, LayoutDashboard, GraduationCap,
   BookOpen, Mail, LogOut, ChevronRight, Globe, ExternalLink, Pencil,
   CheckCircle2, AlertCircle, Building2, Users, Award, Handshake, Check,
+  MapPin, GripVertical, ArrowUp, ArrowDown,
 } from 'lucide-react';
 
 type ToastType = 'success' | 'error';
@@ -40,14 +41,22 @@ interface CourseEntry { _id: string; title: string; university: string; country:
 interface SkillUniEntry { _id: string; name: string; shortName: string; subtitle?: string; color?: string; description?: string; createdAt: string; }
 interface SkillCourseEntry { _id: string; title: string; universityId: string; universityName: string; color?: string; duration?: string; mode?: string; tools?: string; highlights: string[]; createdAt: string; }
 interface LeaderEntry { _id: string; name: string; role: string; bio?: string; image?: string; years?: string; order?: number; createdAt: string; }
+interface DestinationEntry {
+  _id: string; name: string; code: string; tagline?: string; tag?: string;
+  stats?: { unis?: string; avgCost?: string; acceptance?: string; intl?: string };
+  highlights?: string[]; programs?: string[]; topUnis?: { name: string; rank?: string; field?: string }[];
+  salary?: string; order?: number;
+}
 interface PartnerEntry { _id: string; name: string; organization: string; email: string; phone?: string; message?: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; }
 
-type Tab = 'dashboard' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
+type Tab = 'dashboard' | 'destinations' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
 
 const EMPTY_UNI = { name: '', country: '', city: '', website: '', ranking: '', image: '', description: '' };
 const EMPTY_COURSE = { title: '', university: '', country: '', level: "Master's", duration: '', tuitionFee: '', intake: '', description: '' };
 const EMPTY_SKILL_UNI = { name: '', shortName: '', subtitle: '', color: '#3B82F6', description: '' };
 const EMPTY_SKILL_COURSE = { title: '', universityId: '', universityName: '', color: '#3B82F6', duration: '', mode: 'Online', tools: '', highlights: '' };
+const EMPTY_DEST = { name: '', code: '', tagline: '', tag: '', unis: '', avgCost: '', acceptance: '', intl: '', salary: '', highlights: '', programs: '', topUnis: '' };
+const lines = (t: string) => t.split('\n').map(x => x.trim()).filter(Boolean);
 const EMPTY_LEADER = { name: '', role: '', bio: '', image: '', years: '', order: '0' };
 
 const inputCls = 'w-full px-3 py-2.5 text-sm bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-500 transition-all placeholder-gray-400';
@@ -96,6 +105,7 @@ export default function AdminDashboard() {
   const [skillCourses, setSkillCourses] = useState<SkillCourseEntry[]>([]);
   const [leaders, setLeaders] = useState<LeaderEntry[]>([]);
   const [partners, setPartners] = useState<PartnerEntry[]>([]);
+  const [destinations, setDestinations] = useState<DestinationEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [modal, setModal] = useState<string | null>(null);
@@ -104,16 +114,21 @@ export default function AdminDashboard() {
 
   const [uniForm, setUniForm] = useState({ ...EMPTY_UNI });
   const [courseForm, setCourseForm] = useState({ ...EMPTY_COURSE });
+  const [courseCountryMode, setCourseCountryMode] = useState<'list' | 'manual'>('list');
   const [skillUniForm, setSkillUniForm] = useState({ ...EMPTY_SKILL_UNI });
   const [skillCourseForm, setSkillCourseForm] = useState({ ...EMPTY_SKILL_COURSE });
   const [leaderForm, setLeaderForm] = useState({ ...EMPTY_LEADER });
+  const [destForm, setDestForm] = useState({ ...EMPTY_DEST });
+  const dragFrom = useRef<number | null>(null);
+  const [dragOver, setDragOver] = useState<number | null>(null);
+  const [reordering, setReordering] = useState(false);
 
   useEffect(() => { if (typeof window !== 'undefined' && sessionStorage.getItem('adminLoggedIn') !== 'true') router.replace('/'); }, [router]);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [c, u, co, su, sc, l, p] = await Promise.all([
+      const [c, u, co, su, sc, l, p, d] = await Promise.all([
         fetch('/api/contact').then(r => r.json()),
         fetch('/api/admin/universities').then(r => r.json()),
         fetch('/api/admin/courses').then(r => r.json()),
@@ -121,6 +136,7 @@ export default function AdminDashboard() {
         fetch('/api/admin/skill-courses').then(r => r.json()),
         fetch('/api/admin/leaders').then(r => r.json()),
         fetch('/api/admin/partners').then(r => r.json()),
+        fetch('/api/admin/destinations').then(r => r.json()),
       ]);
       setContacts(c.contacts || []);
       setUniversities(u.universities || []);
@@ -129,6 +145,7 @@ export default function AdminDashboard() {
       setSkillCourses(sc.skillCourses || []);
       setLeaders(l.leaders || []);
       setPartners(p.partners || []);
+      setDestinations(d.destinations || []);
     } finally { setLoading(false); }
   }, []);
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -168,12 +185,32 @@ export default function AdminDashboard() {
   // Course CRUD
   const saveCourse = async (e: React.FormEvent) => {
     e.preventDefault();
+    const body = { ...courseForm, country: courseForm.country.trim() };
+    if (!body.country) { showToast('Select a destination or type a country', 'error'); return; }
     try {
-      const data = await crudAction('/api/admin/courses', 'POST', courseForm);
-      setCourses(p => [data.course, ...p]);
-      setModal(null); setCourseForm({ ...EMPTY_COURSE });
-      showToast('Course added');
+      if (editingId) {
+        const data = await crudAction('/api/admin/courses', 'PUT', body, editingId);
+        setCourses(p => p.map(c => c._id === editingId ? data.course : c));
+        showToast('Course updated');
+      } else {
+        const data = await crudAction('/api/admin/courses', 'POST', body);
+        setCourses(p => [data.course, ...p]);
+        showToast('Course added');
+      }
+      setModal(null); setEditingId(null); setCourseForm({ ...EMPTY_COURSE });
     } catch (err) { showToast(err instanceof Error ? err.message : 'Error', 'error'); }
+  };
+  const openNewCourse = () => { setEditingId(null); setCourseForm({ ...EMPTY_COURSE }); setCourseCountryMode('list'); setModal('course'); };
+  const editCourse = (c: CourseEntry) => {
+    // Use the destination dropdown if the country matches a destination, otherwise the manual field
+    const match = destinations.find(d => d.name.toLowerCase() === (c.country || '').trim().toLowerCase());
+    setEditingId(c._id);
+    setCourseForm({
+      title: c.title, university: c.university, country: match ? match.name : c.country, level: c.level,
+      duration: c.duration || '', tuitionFee: c.tuitionFee || '', intake: c.intake || '', description: c.description || '',
+    });
+    setCourseCountryMode(match ? 'list' : 'manual');
+    setModal('course');
   };
   const deleteCourse = async (id: string) => { if (!confirm('Delete?')) return; try { await crudAction('/api/admin/courses', 'DELETE', null, id); setCourses(p => p.filter(c => c._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
 
@@ -236,6 +273,68 @@ export default function AdminDashboard() {
   const deleteLeader = async (id: string) => { if (!confirm('Delete?')) return; try { await crudAction('/api/admin/leaders', 'DELETE', null, id); setLeaders(p => p.filter(l => l._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
   const editLeader = (l: LeaderEntry) => { setEditingId(l._id); setLeaderForm({ name: l.name, role: l.role, bio: l.bio || '', image: l.image || '', years: l.years || '', order: String(l.order || 0) }); setModal('leader'); };
 
+  // Destination CRUD + ordering
+  const destBody = () => ({
+    name: destForm.name, code: destForm.code, tagline: destForm.tagline, tag: destForm.tag, salary: destForm.salary,
+    stats: { unis: destForm.unis, avgCost: destForm.avgCost, acceptance: destForm.acceptance, intl: destForm.intl },
+    highlights: lines(destForm.highlights),
+    programs: lines(destForm.programs),
+    topUnis: lines(destForm.topUnis).map(l => { const [name, rank = '', field = ''] = l.split('|').map(x => x.trim()); return { name, rank, field }; }),
+  });
+  const saveDest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        const data = await crudAction('/api/admin/destinations', 'PUT', destBody(), editingId);
+        setDestinations(p => p.map(d => d._id === editingId ? data.destination : d));
+        showToast('Destination updated');
+      } else {
+        const data = await crudAction('/api/admin/destinations', 'POST', destBody());
+        setDestinations(p => [...p, data.destination]);
+        showToast('Destination added');
+      }
+      setModal(null); setEditingId(null); setDestForm({ ...EMPTY_DEST });
+    } catch (err) { showToast(err instanceof Error ? err.message : 'Error', 'error'); }
+  };
+  const editDest = (d: DestinationEntry) => {
+    setEditingId(d._id);
+    setDestForm({
+      name: d.name, code: d.code, tagline: d.tagline || '', tag: d.tag || '', salary: d.salary || '',
+      unis: d.stats?.unis || '', avgCost: d.stats?.avgCost || '', acceptance: d.stats?.acceptance || '', intl: d.stats?.intl || '',
+      highlights: (d.highlights || []).join('\n'),
+      programs: (d.programs || []).join('\n'),
+      topUnis: (d.topUnis || []).map(u => [u.name, u.rank, u.field].filter(Boolean).join(' | ')).join('\n'),
+    });
+    setModal('destination');
+  };
+  const deleteDest = async (id: string, name: string) => {
+    if (!confirm(`Delete "${name}"? It will be removed from the website.`)) return;
+    try { await crudAction('/api/admin/destinations', 'DELETE', null, id); setDestinations(p => p.filter(d => d._id !== id)); showToast('Deleted'); }
+    catch { showToast('Failed', 'error'); }
+  };
+  const saveOrder = async (next: DestinationEntry[]) => {
+    const prev = destinations;
+    setDestinations(next); // optimistic
+    setReordering(true);
+    try {
+      const res = await fetch('/api/admin/destinations', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ids: next.map(d => d._id) }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setDestinations(data.destinations);
+      showToast('Order saved');
+    } catch (err) {
+      setDestinations(prev);
+      showToast(err instanceof Error ? err.message : 'Could not save order', 'error');
+    } finally { setReordering(false); }
+  };
+  const moveDest = (from: number, to: number) => {
+    if (from === to || to < 0 || to >= destinations.length || reordering) return;
+    const next = [...destinations];
+    const [item] = next.splice(from, 1);
+    next.splice(to, 0, item);
+    saveOrder(next);
+  };
+
   // Partner actions
   const setPartnerStatus = async (id: string, status: 'approved' | 'rejected' | 'pending') => {
     try {
@@ -248,6 +347,7 @@ export default function AdminDashboard() {
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} /> },
+    { id: 'destinations', label: 'Destinations', icon: <MapPin size={18} /> },
     { id: 'universities', label: 'Universities', icon: <GraduationCap size={18} /> },
     { id: 'courses', label: 'Courses', icon: <BookOpen size={18} /> },
     { id: 'skill-unis', label: 'Skill Universities', icon: <Building2 size={18} /> },
@@ -313,6 +413,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <StatCard icon={<MapPin size={20} />} label="Destinations" value={loading ? '—' : destinations.length} color="linear-gradient(135deg,#1F2F5F,#34498A)" onClick={() => setActiveTab('destinations')} />
                 <StatCard icon={<GraduationCap size={20} />} label="Universities" value={loading ? '—' : universities.length} color="linear-gradient(135deg,#6D28D9,#7C3AED)" onClick={() => setActiveTab('universities')} />
                 <StatCard icon={<BookOpen size={20} />} label="Courses" value={loading ? '—' : courses.length} color="linear-gradient(135deg,#0EA5E9,#2563EB)" onClick={() => setActiveTab('courses')} />
                 <StatCard icon={<Building2 size={20} />} label="Skill Unis" value={loading ? '—' : skillUnis.length} color="linear-gradient(135deg,#F59E0B,#D97706)" onClick={() => setActiveTab('skill-unis')} />
@@ -321,6 +422,54 @@ export default function AdminDashboard() {
                 <StatCard icon={<Handshake size={20} />} label="B2B Partners" value={loading ? '—' : partners.length} color="linear-gradient(135deg,#059669,#047857)" onClick={() => setActiveTab('partners')} />
                 <StatCard icon={<Mail size={20} />} label="Messages" value={loading ? '—' : contacts.length} color="linear-gradient(135deg,#EF4444,#DC2626)" onClick={() => setActiveTab('contacts')} />
               </div>
+            </div>
+          )}
+
+          {/* DESTINATIONS */}
+          {activeTab === 'destinations' && (
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <h2 className="text-xl font-bold text-gray-900">Study Destinations</h2>
+                <button onClick={() => { setEditingId(null); setDestForm({ ...EMPTY_DEST }); setModal('destination'); }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#1F2F5F,#34498A)' }}><Plus size={16} /> Add</button>
+              </div>
+              <p className="mb-6 text-sm text-gray-500 flex items-center gap-2">
+                Drag a destination (or use the arrows) to change its position. This order is used in the navbar dropdown, home page, Study Destinations page and footer.
+                {reordering && <Loader2 size={14} className="animate-spin text-violet-500" />}
+              </p>
+              {loading ? <Spinner /> : destinations.length === 0 ? <Empty label="No destinations yet" /> : (
+                <div className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+                  {/* Same 2-column layout and order as the website's Study Destinations dropdown */}
+                  <ol className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {destinations.map((d, i) => (
+                      <li key={d._id}
+                        draggable={!reordering}
+                        onDragStart={(e) => { dragFrom.current = i; e.dataTransfer.effectAllowed = 'move'; }}
+                        onDragOver={(e) => { e.preventDefault(); if (dragOver !== i) setDragOver(i); }}
+                        onDragLeave={() => setDragOver(o => (o === i ? null : o))}
+                        onDrop={(e) => { e.preventDefault(); const from = dragFrom.current; dragFrom.current = null; setDragOver(null); if (from !== null) moveDest(from, i); }}
+                        onDragEnd={() => { dragFrom.current = null; setDragOver(null); }}
+                        className={`group flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${dragOver === i ? 'border-violet-400 bg-violet-50 ring-2 ring-violet-200' : 'border-gray-100 hover:bg-gray-50'} ${reordering ? 'opacity-70' : 'cursor-grab active:cursor-grabbing'}`}>
+                        <GripVertical size={16} className="flex-shrink-0 text-gray-300 group-hover:text-gray-500" />
+                        <span className="w-5 text-center text-xs font-bold text-gray-300">{i + 1}</span>
+                        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: '#FDF6E7', color: '#A8740A' }}>{d.code}</span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-gray-900">Study in {d.name}</p>
+                          <p className="truncate text-xs text-gray-500">
+                            {d.stats?.unis ? `${d.stats.unis} ${d.stats.unis === '1' ? 'university' : 'universities'}` : 'No university count'}
+                            {d.tag ? ` · ${d.tag}` : ''}
+                          </p>
+                        </div>
+                        <div className="flex flex-shrink-0 items-center gap-0.5">
+                          <button onClick={() => moveDest(i, i - 1)} disabled={i === 0 || reordering} title="Move up" className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 disabled:opacity-30"><ArrowUp size={13} /></button>
+                          <button onClick={() => moveDest(i, i + 1)} disabled={i === destinations.length - 1 || reordering} title="Move down" className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 disabled:opacity-30"><ArrowDown size={13} /></button>
+                          <button onClick={() => editDest(d)} title="Edit" className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-500"><Pencil size={13} /></button>
+                          <button onClick={() => deleteDest(d._id, d.name)} title="Delete" className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={13} /></button>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 
@@ -359,7 +508,7 @@ export default function AdminDashboard() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Courses</h2>
-                <button onClick={() => { setCourseForm({ ...EMPTY_COURSE }); setModal('course'); }} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#0EA5E9,#2563EB)' }}><Plus size={16} /> Add</button>
+                <button onClick={openNewCourse} className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: 'linear-gradient(135deg,#0EA5E9,#2563EB)' }}><Plus size={16} /> Add</button>
               </div>
               {loading ? <Spinner /> : courses.length === 0 ? <Empty label="No courses yet" /> : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -367,7 +516,10 @@ export default function AdminDashboard() {
                     <div key={c._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-md transition-all">
                       <div className="flex items-start justify-between mb-2">
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-semibold">{c.level}</span>
-                        <button onClick={() => deleteCourse(c._id)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 opacity-0 group-hover:opacity-100"><Trash2 size={13} /></button>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => editCourse(c)} title="Edit" className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-500"><Pencil size={13} /></button>
+                          <button onClick={() => deleteCourse(c._id)} title="Delete" className="p-1.5 rounded-lg hover:bg-red-50 text-red-400"><Trash2 size={13} /></button>
+                        </div>
                       </div>
                       <h3 className="font-bold text-gray-900 text-sm mb-1">{c.title}</h3>
                       <p className="text-xs text-violet-500">{c.university}</p>
@@ -585,13 +737,29 @@ export default function AdminDashboard() {
       )}
 
       {modal === 'course' && (
-        <Modal title="Add Course" onClose={() => setModal(null)}>
+        <Modal title={editingId ? 'Edit Course' : 'Add Course'} onClose={() => { setModal(null); setEditingId(null); }}>
           <form onSubmit={saveCourse} className="space-y-4">
             <div><label className={labelCls}>Title *</label><input required className={inputCls} value={courseForm.title} onChange={e => setCourseForm(p => ({...p, title: e.target.value}))} /></div>
+            <div><label className={labelCls}>University *</label><input required className={inputCls} value={courseForm.university} onChange={e => setCourseForm(p => ({...p, university: e.target.value}))} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className={labelCls}>University *</label><input required className={inputCls} value={courseForm.university} onChange={e => setCourseForm(p => ({...p, university: e.target.value}))} /></div>
-              <div><label className={labelCls}>Country *</label><input required className={inputCls} value={courseForm.country} onChange={e => setCourseForm(p => ({...p, country: e.target.value}))} /></div>
+              <div>
+                <label htmlFor="course-country" className={labelCls}>Country *</label>
+                <select id="course-country" className={inputCls}
+                  required={!(courseCountryMode === 'manual' && courseForm.country.trim())}
+                  value={courseCountryMode === 'list' ? courseForm.country : ''}
+                  onChange={e => { setCourseCountryMode('list'); setCourseForm(p => ({...p, country: e.target.value})); }}>
+                  <option value="">{destinations.length ? 'Select a destination' : 'No destinations yet'}</option>
+                  {destinations.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="course-country-manual" className={labelCls}>Or type a country</label>
+                <input id="course-country-manual" className={inputCls} placeholder="e.g. United Kingdom"
+                  value={courseCountryMode === 'manual' ? courseForm.country : ''}
+                  onChange={e => { setCourseCountryMode('manual'); setCourseForm(p => ({...p, country: e.target.value})); }} />
+              </div>
             </div>
+            <p className="-mt-2 text-xs text-gray-400">Pick one of your study destinations, or type a country that isn&apos;t in the list.</p>
             <div><label className={labelCls}>Level *</label><select required className={inputCls} value={courseForm.level} onChange={e => setCourseForm(p => ({...p, level: e.target.value}))}>{["Bachelor's","Master's","PhD","MBA","Certificate"].map(l => <option key={l}>{l}</option>)}</select></div>
             <div className="grid grid-cols-3 gap-3">
               <div><label className={labelCls}>Duration</label><input className={inputCls} value={courseForm.duration} onChange={e => setCourseForm(p => ({...p, duration: e.target.value}))} /></div>
@@ -645,6 +813,35 @@ export default function AdminDashboard() {
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl text-sm border border-gray-200 hover:bg-gray-50">Cancel</button>
               <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ background: 'linear-gradient(135deg,#10B981,#059669)' }}>{saving ? 'Saving...' : 'Save'}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {modal === 'destination' && (
+        <Modal title={editingId ? 'Edit Destination' : 'Add Destination'} onClose={() => { setModal(null); setEditingId(null); }}>
+          <form onSubmit={saveDest} className="space-y-4">
+            <div className="grid grid-cols-[1fr_110px] gap-3">
+              <div><label className={labelCls}>Country name *</label><input required className={inputCls} placeholder="Albania" value={destForm.name} onChange={e => setDestForm(p => ({...p, name: e.target.value}))} /></div>
+              <div><label className={labelCls}>Code *</label><input required maxLength={3} className={`${inputCls} uppercase`} placeholder="AL" value={destForm.code} onChange={e => setDestForm(p => ({...p, code: e.target.value}))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={labelCls}>Tagline</label><input className={inputCls} placeholder="Affordable European education hub" value={destForm.tagline} onChange={e => setDestForm(p => ({...p, tagline: e.target.value}))} /></div>
+              <div><label className={labelCls}>Tag</label><input className={inputCls} placeholder="Most Popular" value={destForm.tag} onChange={e => setDestForm(p => ({...p, tag: e.target.value}))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={labelCls}>No. of universities</label><input className={inputCls} placeholder="5" value={destForm.unis} onChange={e => setDestForm(p => ({...p, unis: e.target.value}))} /></div>
+              <div><label className={labelCls}>Avg. tuition</label><input className={inputCls} placeholder="€2k–5k/yr" value={destForm.avgCost} onChange={e => setDestForm(p => ({...p, avgCost: e.target.value}))} /></div>
+              <div><label className={labelCls}>Acceptance rate</label><input className={inputCls} placeholder="80%" value={destForm.acceptance} onChange={e => setDestForm(p => ({...p, acceptance: e.target.value}))} /></div>
+              <div><label className={labelCls}>Intl. students</label><input className={inputCls} placeholder="10k+" value={destForm.intl} onChange={e => setDestForm(p => ({...p, intl: e.target.value}))} /></div>
+            </div>
+            <div><label className={labelCls}>Avg. graduate salary</label><input className={inputCls} placeholder="€15,000+" value={destForm.salary} onChange={e => setDestForm(p => ({...p, salary: e.target.value}))} /></div>
+            <div><label className={labelCls}>Partner universities (one per line: Name | Rank | Field)</label><textarea rows={4} className={`${inputCls} resize-y`} placeholder={"Epoka University | Top Ranked | Engineering\nLuarasi University | Accredited | Law & Business"} value={destForm.topUnis} onChange={e => setDestForm(p => ({...p, topUnis: e.target.value}))} /></div>
+            <div><label className={labelCls}>Why study here? (one per line)</label><textarea rows={3} className={`${inputCls} resize-y`} placeholder={"Affordable tuition & living costs\nEnglish-taught programs available"} value={destForm.highlights} onChange={e => setDestForm(p => ({...p, highlights: e.target.value}))} /></div>
+            <div><label className={labelCls}>Popular programs (one per line)</label><textarea rows={3} className={`${inputCls} resize-y`} placeholder={"BSc Computer Science\nMBA"} value={destForm.programs} onChange={e => setDestForm(p => ({...p, programs: e.target.value}))} /></div>
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={() => setModal(null)} className="flex-1 py-2.5 rounded-xl text-sm border border-gray-200 hover:bg-gray-50">Cancel</button>
+              <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ background: 'linear-gradient(135deg,#1F2F5F,#34498A)' }}>{saving ? 'Saving...' : 'Save'}</button>
             </div>
           </form>
         </Modal>

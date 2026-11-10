@@ -11,7 +11,8 @@ export interface Destination {
   salary: string;
 }
 
-export const destinations: Destination[] = [
+// Initial data: copied into the database on first run, and used as a fallback if the database is unreachable.
+export const defaultDestinations: Destination[] = [
   {
     id: 'al', code: 'AL', name: 'Albania',
     tagline: 'Affordable European education hub',

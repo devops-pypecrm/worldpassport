@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   Handshake, Globe, Headset, FileCheck, BadgeCheck, ArrowRight, Send, Loader, CheckCircle2,
-  Wallet, LineChart, ClipboardCheck, UserPlus, LogIn, GraduationCap, Users, TrendingUp,
+  Wallet, LineChart, ClipboardCheck, UserPlus, GraduationCap, Users, TrendingUp,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -46,7 +46,7 @@ const steps = [
 export default function PartnerWithUsPage() {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
-  const [form, setForm] = useState({ name: '', organization: '', email: '', phone: '', message: '', password: '' });
+  const [form, setForm] = useState({ name: '', organization: '', email: '', phone: '', message: '' });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -65,7 +65,7 @@ export default function PartnerWithUsPage() {
       const data = await res.json();
       if (res.ok) {
         setStatus('success');
-        setForm({ name: '', organization: '', email: '', phone: '', message: '', password: '' });
+        setForm({ name: '', organization: '', email: '', phone: '', message: '' });
       } else {
         setStatus('error');
         setErrorMsg(data.error || 'Something went wrong. Please try again.');
@@ -88,9 +88,9 @@ export default function PartnerWithUsPage() {
         aside={
           <div className="card p-7">
             <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-navy text-white"><Handshake size={22} /></span>
-            <p className="mt-5 font-display text-xl font-semibold text-navy-900">Already a partner?</p>
-            <p className="mt-1 text-sm text-ink-muted">Sign in to view your account and referrals.</p>
-            <Link href="/b2b/login" className="btn-outline mt-5 w-full"><LogIn size={15} /> Partner login</Link>
+            <p className="mt-5 font-display text-xl font-semibold text-navy-900">Ready to work together?</p>
+            <p className="mt-1 text-sm text-ink-muted">Send us a short application and our partnerships team will reply within 2 business days.</p>
+            <a href="#partner-form" className="btn-outline mt-5 w-full"><Send size={15} /> Apply to partner</a>
           </div>
         }
       >
@@ -197,8 +197,8 @@ export default function PartnerWithUsPage() {
                   <span className="flex h-16 w-16 items-center justify-center rounded-full bg-gold-50"><CheckCircle2 size={32} className="text-gold" /></span>
                   <h3 className="mt-5 font-display text-2xl font-semibold text-navy-900">Application submitted</h3>
                   <p className="mx-auto mt-2 max-w-sm text-sm text-ink-muted">
-                    Your partner account has been created and is pending review. We&apos;ll email you once
-                    it&apos;s approved, and then you can sign in from the partner login page.
+                    Thank you for your interest. Our partnerships team will review your application and
+                    get back to you by email within 2 business days.
                   </p>
                 </div>
               ) : (
@@ -218,10 +218,6 @@ export default function PartnerWithUsPage() {
                   <div>
                     <label htmlFor="p-phone" className="field-label">Phone</label>
                     <input id="p-phone" name="phone" value={form.phone} onChange={handleChange} className="field" />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label htmlFor="p-pass" className="field-label">Choose a password * <span className="font-normal text-ink-soft">(min. 8 characters)</span></label>
-                    <input id="p-pass" required type="password" name="password" value={form.password} onChange={handleChange} minLength={8} className="field" />
                   </div>
                   <div className="sm:col-span-2">
                     <label htmlFor="p-msg" className="field-label">About your students <span className="font-normal text-ink-soft">(optional)</span></label>

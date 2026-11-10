@@ -78,11 +78,30 @@ const PartnerSchema = new Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   message: { type: String },
-  passwordHash: { type: String, required: true },
-  passwordSalt: { type: String, required: true },
+  // Legacy fields from the removed partner login; kept optional so older records still load.
+  passwordHash: { type: String },
+  passwordSalt: { type: String },
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
-  sessionToken: { type: String },
-  sessionExpires: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// Study destinations (navbar dropdown, home page, Study Destinations page). `order` controls display position.
+const DestinationSchema = new Schema({
+  name: { type: String, required: true, trim: true },
+  code: { type: String, required: true, trim: true, uppercase: true },
+  tagline: { type: String, default: '' },
+  tag: { type: String, default: '' },
+  stats: {
+    unis: { type: String, default: '' },
+    avgCost: { type: String, default: '' },
+    acceptance: { type: String, default: '' },
+    intl: { type: String, default: '' },
+  },
+  highlights: [{ type: String }],
+  topUnis: [{ _id: false, name: { type: String }, rank: { type: String }, field: { type: String } }],
+  programs: [{ type: String }],
+  salary: { type: String, default: '' },
+  order: { type: Number, default: 0, index: true },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -103,4 +122,5 @@ export const Course         = mongoose.models.Course         || mongoose.model('
 export const SkillUniversity = mongoose.models.SkillUniversity || mongoose.model('SkillUniversity', SkillUniversitySchema);
 export const SkillCourse    = mongoose.models.SkillCourse    || mongoose.model('SkillCourse',    SkillCourseSchema);
 export const Partner        = mongoose.models.Partner        || mongoose.model('Partner',        PartnerSchema);
+export const Destination    = mongoose.models.Destination    || mongoose.model('Destination',    DestinationSchema);
 export const Leader         = mongoose.models.Leader         || mongoose.model('Leader',         LeaderSchema);

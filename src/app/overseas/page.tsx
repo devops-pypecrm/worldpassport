@@ -14,7 +14,8 @@ import PageHero from '@/components/PageHero';
 import SectionHeading from '@/components/SectionHeading';
 import Features from '@/components/Features';
 import CTASection from '@/components/CTASection';
-import { destinations } from '@/lib/destinations';
+import DestinationSelect from '@/components/DestinationSelect';
+import { useDestinations, countWord } from '@/lib/useDestinations';
 
 const advantages = [
   { icon: FileCheck, title: 'Zero hidden fees', desc: 'Complete transparency in pricing. What we quote is what you pay.' },
@@ -41,23 +42,30 @@ export default function OverseasPage() {
 }
 
 function OverseasContent() {
-  const [activeId, setActiveId] = useState(destinations[0].id);
+  const { destinations, loading } = useDestinations();
+  const [activeId, setActiveId] = useState('');
   // Re-run whenever ?search= changes (e.g. picking a country from the navbar while already on this page)
   const search = useSearchParams().get('search') || '';
 
   useEffect(() => {
+    if (destinations.length === 0) return;
     const q = search.toLowerCase();
-    if (!q) return;
+    if (!q) {
+      // Default to the first destination in the admin-defined order
+      setActiveId((cur) => (destinations.some((d) => d.id === cur) ? cur : destinations[0].id));
+      return;
+    }
     const match = destinations.find((c) =>
       c.name.toLowerCase().includes(q) ||
       c.programs.some((p) => p.toLowerCase().includes(q)) ||
       c.topUnis.some((u) => u.name.toLowerCase().includes(q) || u.field.toLowerCase().includes(q)),
     );
-    if (match) setActiveId(match.id);
+    setActiveId(match ? match.id : destinations[0].id);
     setTimeout(() => document.getElementById('country-explorer')?.scrollIntoView({ behavior: 'smooth' }), 400);
-  }, [search]);
+  }, [search, destinations]);
 
-  const active = destinations.find((c) => c.id === activeId)!;
+  const active = destinations.find((c) => c.id === activeId);
+  const countryCount = loading ? 'Several' : countWord(destinations.length);
 
   return (
     <PageWrapper>
@@ -67,13 +75,13 @@ function OverseasContent() {
         crumbs={[{ label: 'Study Abroad' }]}
         eyebrow="Study abroad"
         title="Where will you study next?"
-        lead="Five countries, 15+ accredited universities and one trusted guide. We handle everything from your application to your arrival on campus."
+        lead={`${countryCount} countries, 15+ accredited universities and one trusted guide. We handle everything from your application to your arrival on campus.`}
         aside={
           <div className="card grid grid-cols-3 divide-x divide-cream-200 p-2 text-center">
             {[
               { val: '10,000+', label: 'Students placed' },
               { val: '98%', label: 'Visa approval' },
-              { val: '5', label: 'Countries' },
+              { val: loading ? '—' : String(destinations.length), label: 'Countries' },
             ].map((s) => (
               <div key={s.label} className="px-2 py-5">
                 <p className="font-display text-2xl font-semibold text-navy sm:text-3xl">{s.val}</p>
@@ -94,26 +102,20 @@ function OverseasContent() {
         <div className="container-x">
           <SectionHeading eyebrow="Compare destinations" title="Explore countries and universities" />
 
-          <div role="tablist" aria-label="Destinations" className="mt-10 flex flex-wrap justify-center gap-2">
-            {destinations.map((c) => {
-              const on = c.id === activeId;
-              return (
-                <button
-                  key={c.id}
-                  role="tab"
-                  aria-selected={on}
-                  onClick={() => setActiveId(c.id)}
-                  className={`flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
-                    on ? 'border-navy bg-navy text-white' : 'border-cream-200 bg-white text-ink-muted hover:border-navy-200 hover:text-navy'
-                  }`}
-                >
-                  <span className={`text-[10px] font-bold ${on ? 'text-gold-light' : 'text-gold-dark'}`}>{c.code}</span>
-                  {c.name}
-                </button>
-              );
-            })}
-          </div>
+          {/* Destination dropdown (full width of the three cards below) */}
+          {destinations.length > 0 && (
+            <DestinationSelect destinations={destinations} value={activeId} onChange={setActiveId} />
+          )}
 
+          {loading && (
+            <div className="mt-10 grid gap-5 lg:grid-cols-[1fr_1.2fr_1fr]" aria-hidden="true">
+              {[0, 1, 2].map((i) => <div key={i} className="h-80 animate-pulse rounded-2xl bg-cream" />)}
+            </div>
+          )}
+          {!loading && !active && (
+            <p className="mt-10 text-center text-ink-muted">Destinations will be listed here soon.</p>
+          )}
+          {active && (
           <AnimatePresence mode="wait">
             <motion.div
               key={activeId}
@@ -197,6 +199,7 @@ function OverseasContent() {
               </div>
             </motion.div>
           </AnimatePresence>
+          )}
         </div>
       </section>
 

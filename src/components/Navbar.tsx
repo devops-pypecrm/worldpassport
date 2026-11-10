@@ -3,10 +3,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, X, LogIn, ChevronDown, Video, Handshake, Globe2 } from 'lucide-react';
+import { Menu, X, LogIn, ChevronDown, Video, Globe2 } from 'lucide-react';
 import Logo from './Logo';
 import AdminLoginModal from './AdminLoginModal';
-import { destinations } from '@/lib/destinations';
+import { useDestinations, universityLabel } from '@/lib/useDestinations';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -21,6 +21,7 @@ function isActive(pathname: string, href: string) {
 }
 
 export default function Navbar() {
+  const { destinations } = useDestinations();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -98,7 +99,7 @@ export default function Navbar() {
                                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gold-50 text-xs font-bold text-gold-dark">{d.code}</span>
                                   <span>
                                     <span className="block text-sm font-semibold text-ink">Study in {d.name}</span>
-                                    <span className="block text-xs text-ink-muted">{d.stats.unis} {d.stats.unis === '1' ? 'university' : 'universities'}</span>
+                                    {d.stats.unis && <span className="block text-xs text-ink-muted">{universityLabel(d.stats.unis)}</span>}
                                   </span>
                                 </Link>
                               ))}
@@ -125,10 +126,6 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden xl:flex items-center gap-2.5">
-            <Link href="/b2b/login"
-              className={`btn !px-4 !py-2 border text-[13px] leading-tight ${solid ? 'border-navy/30 text-navy hover:bg-navy-50' : 'border-white text-white hover:bg-white/10'}`}>
-              <Handshake size={15} /> Partner Login
-            </Link>
             <button onClick={() => setLoginOpen(true)} className="btn-accent !px-4 !py-2.5 text-[13px]">
               <LogIn size={15} /> Login
             </button>
@@ -172,12 +169,11 @@ export default function Navbar() {
                     </Link>
                   ))}
                 </div>
-                <div className="mt-3 grid gap-2 border-t border-cream-200 pt-4 sm:grid-cols-3">
+                <div className="mt-3 grid gap-2 border-t border-cream-200 pt-4 sm:grid-cols-2">
                   <Link href="/contact" className="btn-accent"><Video size={16} /> Book Free Counselling</Link>
                   <button onClick={() => { setMobileOpen(false); setLoginOpen(true); }} className="btn-outline">
                     <LogIn size={15} /> Login
                   </button>
-                  <Link href="/b2b/login" className="btn-outline"><Handshake size={15} /> Partner Login</Link>
                 </div>
               </div>
             </motion.div>
