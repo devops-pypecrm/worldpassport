@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -10,6 +10,7 @@ import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
 import PageHero from '@/components/PageHero';
 import CTASection from '@/components/CTASection';
+import ProgramApplyModal from '@/components/ProgramApplyModal';
 import { useDestinations } from '@/lib/useDestinations';
 import {
   Program, PROGRAM_LEVELS, buildProgramsUrl, fetchPrograms, filterPrograms, uniqueValues,
@@ -35,6 +36,8 @@ function ProgramsContent() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [applyTo, setApplyTo] = useState<Program | null>(null); // program whose "Apply now" form is open
+  const closeApply = useCallback(() => setApplyTo(null), []);
   const { destinations } = useDestinations();
 
   useEffect(() => {
@@ -148,7 +151,7 @@ function ProgramsContent() {
                 Showing <span className="font-semibold text-navy-900">{results.length}</span> of {programs.length} program{programs.length === 1 ? '' : 's'}
               </p>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {results.map((p) => <ProgramCard key={p._id} p={p} />)}
+                {results.map((p) => <ProgramCard key={p._id} p={p} onApply={setApplyTo} />)}
               </div>
             </>
           )}
@@ -158,12 +161,13 @@ function ProgramsContent() {
       <div className="pb-16">
         <CTASection title="Not sure which program fits you?" lead="Book a free counselling session and we'll shortlist programs that match your grades, goals and budget." />
       </div>
+      <ProgramApplyModal program={applyTo} onClose={closeApply} />
       <Footer />
     </PageWrapper>
   );
 }
 
-function ProgramCard({ p }: { p: Program }) {
+function ProgramCard({ p, onApply }: { p: Program; onApply: (p: Program) => void }) {
   const meta = [
     { icon: Clock, label: 'Duration', value: p.duration },
     { icon: Wallet, label: 'Tuition', value: p.tuitionFee },
@@ -193,7 +197,7 @@ function ProgramCard({ p }: { p: Program }) {
       )}
 
       <div className="mt-auto pt-5">
-        <Link href="/contact" className="btn-accent w-full">Apply now <ArrowRight size={15} /></Link>
+        <button type="button" onClick={() => onApply(p)} className="btn-accent w-full">Apply now <ArrowRight size={15} /></button>
       </div>
     </article>
   );

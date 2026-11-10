@@ -3,9 +3,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Download, Loader2, RefreshCw, Search, Inbox, ChevronDown } from 'lucide-react';
 import type { Enquiry } from '@/lib/enquiries';
 
-const SOURCES = ['Website popup', 'Contact form', 'Partner application'];
+const SOURCES = ['Program application', 'Website popup', 'Contact form', 'Partner application'];
 
 const sourceStyle: Record<string, string> = {
+  'Program application': 'bg-orange-50 text-orange-600',
   'Website popup': 'bg-violet-50 text-violet-600',
   'Contact form': 'bg-blue-50 text-blue-600',
   'Partner application': 'bg-emerald-50 text-emerald-600',
@@ -108,7 +109,7 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="relative min-w-[220px] flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, phone, message…"
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search name, email, phone, program, message…"
             className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/25" />
         </div>
         <select value={source} onChange={(e) => setSource(e.target.value)}
@@ -135,7 +136,7 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-gray-50">
-                    {['#', 'Date', 'Source', 'Name', 'Email', 'Phone', 'Interested in', 'Message', 'Status', ''].map((h, i) => (
+                    {['#', 'Date', 'Source', 'Name', 'Email', 'Phone', 'Interested in', 'Program / Course', 'University', 'Destination', 'Level', 'Duration', 'Tuition fee', 'Intake', 'Message', 'Status', ''].map((h, i) => (
                       <th key={i} className="whitespace-nowrap px-4 py-3 text-left text-xs font-bold uppercase text-gray-400">{h}</th>
                     ))}
                   </tr>
@@ -162,6 +163,13 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
                           {r.phone ? <a href={`tel:${r.phone.replace(/\s/g, '')}`} onClick={(e) => e.stopPropagation()} className="hover:underline">{r.phone}</a> : '—'}
                         </td>
                         <td className="px-4 py-3 text-gray-600">{r.subject || '—'}</td>
+                        <td className="min-w-[180px] px-4 py-3 font-medium text-gray-800">{r.program || '—'}</td>
+                        <td className="min-w-[160px] px-4 py-3 text-gray-600">{r.university || '—'}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-gray-600">{r.destination || '—'}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-gray-600">{r.level || '—'}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-gray-600">{r.duration || '—'}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-gray-600">{r.tuitionFee || '—'}</td>
+                        <td className="whitespace-nowrap px-4 py-3 text-gray-600">{r.intake || '—'}</td>
                         <td className={`px-4 py-3 text-gray-500 ${open ? 'min-w-[280px] whitespace-pre-wrap' : 'max-w-[240px] truncate'}`}>{r.message || '—'}</td>
                         <td className="px-4 py-3">
                           {r.status ? <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${statusStyle[r.status] || 'bg-gray-100 text-gray-600'}`}>{r.status}</span> : <span className="text-gray-300">—</span>}

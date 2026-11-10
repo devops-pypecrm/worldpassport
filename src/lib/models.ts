@@ -93,6 +93,13 @@ const LeadSchema = new Schema({
   destination: { type: String, trim: true },
   level: { type: String, trim: true },
   message: { type: String, trim: true },
+  // Filled when the lead comes from "Apply now" on a program card (source: 'Program application')
+  programId: { type: String },
+  program: { type: String, trim: true },
+  university: { type: String, trim: true },
+  duration: { type: String, trim: true },
+  tuitionFee: { type: String, trim: true },
+  intake: { type: String, trim: true },
   source: { type: String, default: 'Website popup' },
   page: { type: String },
   createdAt: { type: Date, default: Date.now },

@@ -7,7 +7,7 @@ import { Contact, Partner, Lead } from '@/lib/models';
  * combines them into one list so the admin panel can show and export all leads together.
  */
 
-export const ENQUIRY_SOURCES = ['Website popup', 'Contact form', 'Partner application'] as const;
+export const ENQUIRY_SOURCES = ['Program application', 'Website popup', 'Contact form', 'Partner application'] as const;
 export type EnquirySource = (typeof ENQUIRY_SOURCES)[number];
 
 export interface Enquiry {
@@ -18,6 +18,14 @@ export interface Enquiry {
   phone: string;
   organization: string;
   subject: string;
+  // Program / study details (filled for program applications and the enquiry popup)
+  program: string;
+  university: string;
+  destination: string;
+  level: string;
+  duration: string;
+  tuitionFee: string;
+  intake: string;
   message: string;
   status: string;
   createdAt: string;
@@ -36,7 +44,8 @@ export async function getEnquiries({ source, q }: EnquiryFilters = {}): Promise<
   await connectDB();
   const wantContact = !source || source === 'Contact form';
   const wantPartner = !source || source === 'Partner application';
-  const wantLead = !source || source === 'Website popup';
+  const leadSources = ['Website popup', 'Program application'];
+  const wantLead = !source || leadSources.includes(source);
 
   const [contacts, partners, leads] = await Promise.all([
     wantContact ? Contact.find({}).sort({ createdAt: -1 }).lean<Doc[]>() : Promise.resolve([] as Doc[]),
@@ -44,31 +53,41 @@ export async function getEnquiries({ source, q }: EnquiryFilters = {}): Promise<
     wantPartner
       ? Partner.find({}).select('-passwordHash -passwordSalt -sessionToken -sessionExpires').sort({ createdAt: -1 }).lean<Doc[]>()
       : Promise.resolve([] as Doc[]),
-    wantLead ? Lead.find({}).sort({ createdAt: -1 }).lean<Doc[]>() : Promise.resolve([] as Doc[]),
+    wantLead
+      // Older popup leads have no `source` stored, so treat a missing source as 'Website popup'
+      ? Lead.find(!source ? {} : source === 'Website popup' ? { source: { $in: ['Website popup', null] } } : { source })
+          .sort({ createdAt: -1 }).lean<Doc[]>()
+      : Promise.resolve([] as Doc[]),
   ]);
 
+  const noStudy = { program: '', university: '', destination: '', level: '', duration: '', tuitionFee: '', intake: '' };
   const rows: Enquiry[] = [
     ...leads.map((l) => ({
-      _id: String(l._id), source: 'Website popup' as const,
+      _id: String(l._id),
+      source: (l.source === 'Program application' ? 'Program application' : 'Website popup') as EnquirySource,
       name: s(l.name), email: s(l.email), phone: s(l.phone), organization: '',
-      subject: [s(l.destination), s(l.level)].filter(Boolean).join(' · '), message: s(l.message), status: '', createdAt: iso(l.createdAt),
+      subject: l.source === 'Program application' ? 'Program application' : 'General enquiry',
+      program: s(l.program), university: s(l.university), destination: s(l.destination), level: s(l.level),
+      duration: s(l.duration), tuitionFee: s(l.tuitionFee), intake: s(l.intake),
+      message: s(l.message), status: '', createdAt: iso(l.createdAt),
     })),
     ...contacts.map((c) => ({
       _id: String(c._id), source: 'Contact form' as const,
       name: s(c.name), email: s(c.email), phone: s(c.phone), organization: '',
-      subject: s(c.subject), message: s(c.message), status: '', createdAt: iso(c.createdAt),
+      subject: s(c.subject), ...noStudy, message: s(c.message), status: '', createdAt: iso(c.createdAt),
     })),
     ...partners.map((p) => ({
       _id: String(p._id), source: 'Partner application' as const,
       name: s(p.name), email: s(p.email), phone: s(p.phone), organization: s(p.organization),
-      subject: 'Partnership', message: s(p.message), status: s(p.status), createdAt: iso(p.createdAt),
+      subject: 'Partnership', ...noStudy, message: s(p.message), status: s(p.status), createdAt: iso(p.createdAt),
     })),
   ];
 
   const term = (q || '').trim().toLowerCase();
   const filtered = term
     ? rows.filter((r) =>
-        [r.name, r.email, r.phone, r.organization, r.subject, r.message].some((v) => v.toLowerCase().includes(term)))
+        [r.name, r.email, r.phone, r.organization, r.subject, r.program, r.university, r.destination, r.level, r.message]
+          .some((v) => v.toLowerCase().includes(term)))
     : rows;
 
   // Newest first across all sources

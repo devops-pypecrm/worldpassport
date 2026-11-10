@@ -26,7 +26,14 @@ export async function GET(req: NextRequest) {
       { header: 'Email', key: 'email', width: 30 },
       { header: 'Phone', key: 'phone', width: 18 },
       { header: 'Organisation', key: 'organization', width: 24 },
-      { header: 'Interested in / Subject', key: 'subject', width: 26 },
+      { header: 'Interested in / Subject', key: 'subject', width: 24 },
+      { header: 'Program / Course', key: 'program', width: 32 },
+      { header: 'University', key: 'university', width: 30 },
+      { header: 'Destination', key: 'destination', width: 16 },
+      { header: 'Study level', key: 'level', width: 14 },
+      { header: 'Duration', key: 'duration', width: 14 },
+      { header: 'Tuition fee', key: 'tuitionFee', width: 16 },
+      { header: 'Intake', key: 'intake', width: 14 },
       { header: 'Message', key: 'message', width: 60 },
       { header: 'Status', key: 'status', width: 12 },
     ];
@@ -41,6 +48,13 @@ export async function GET(req: NextRequest) {
         phone: safe(e.phone),
         organization: safe(e.organization),
         subject: safe(e.subject),
+        program: safe(e.program),
+        university: safe(e.university),
+        destination: safe(e.destination),
+        level: safe(e.level),
+        duration: safe(e.duration),
+        tuitionFee: safe(e.tuitionFee),
+        intake: safe(e.intake),
         message: safe(e.message),
         status: e.status,
       });
@@ -53,7 +67,7 @@ export async function GET(req: NextRequest) {
     header.height = 22;
     ws.getColumn('date').numFmt = 'dd mmm yyyy hh:mm';
     ws.getColumn('message').alignment = { wrapText: true, vertical: 'top' };
-    ws.autoFilter = { from: 'A1', to: 'J1' };
+    ws.autoFilter = { from: 'A1', to: { row: 1, column: ws.columnCount } };
 
     const buffer = await wb.xlsx.writeBuffer();
     const stamp = new Date().toISOString().slice(0, 10);
