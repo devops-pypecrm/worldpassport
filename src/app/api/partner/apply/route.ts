@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Partner } from '@/lib/models';
+import { sendPartnerApplicationMail } from '@/lib/mailer';
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,7 +26,10 @@ export async function POST(req: NextRequest) {
       status: 'pending',
     });
 
-    return NextResponse.json({ success: true, id: partner._id }, { status: 201 });
+    // Email the application right away (saved to the admin panel above either way)
+    const emailed = await sendPartnerApplicationMail({ name, organization, email, phone, message });
+
+    return NextResponse.json({ success: true, id: partner._id, emailed }, { status: 201 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[POST /api/partner/apply]', msg);
