@@ -135,6 +135,14 @@ const LeaderSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Third-party integration settings (one document per integration, e.g. name: 'crm')
+const IntegrationSchema = new Schema({
+  name: { type: String, required: true, unique: true },
+  apiKey: { type: String },
+  endpoint: { type: String },
+  updatedAt: { type: Date, default: Date.now },
+});
+
 export const Contact        = mongoose.models.Contact        || mongoose.model('Contact',        ContactSchema);
 export const Newsletter     = mongoose.models.Newsletter     || mongoose.model('Newsletter',     NewsletterSchema);
 export const University     = mongoose.models.University     || mongoose.model('University',     UniversitySchema);
@@ -145,3 +153,4 @@ export const Partner        = mongoose.models.Partner        || mongoose.model('
 export const Lead           = mongoose.models.Lead           || mongoose.model('Lead',           LeadSchema);
 export const Destination    = mongoose.models.Destination    || mongoose.model('Destination',    DestinationSchema);
 export const Leader         = mongoose.models.Leader         || mongoose.model('Leader',         LeaderSchema);
+export const Integration    = mongoose.models.Integration    || mongoose.model('Integration',    IntegrationSchema);

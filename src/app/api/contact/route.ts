@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Contact } from '@/lib/models';
+import { sendLeadToCrm } from '@/lib/crm';
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,18 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const contact = await Contact.create(body);
 
-    return NextResponse.json({ success: true, id: contact._id }, { status: 201 });
+    // Send the same lead to the CRM (Admin → Integration). Fields without a CRM field go into `message`.
+    const crm = await sendLeadToCrm({
+      name: String(name), email: String(email), phone: typeof body.phone === 'string' ? body.phone : '',
+      message: String(message),
+      source: 'website_contact_form',
+      details: [
+        ['Enquiry type', 'Contact form'],
+        ['Interested in', typeof body.subject === 'string' ? body.subject : ''],
+      ],
+    });
+
+    return NextResponse.json({ success: true, id: contact._id, crm }, { status: 201 });
   } catch (error) {
     console.error('Contact API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

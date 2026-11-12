@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import { Lead, Course } from '@/lib/models';
+import { sendLeadToCrm } from '@/lib/crm';
 
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -66,7 +67,25 @@ export async function POST(req: NextRequest) {
     }
 
     const saved = await Lead.create({ ...lead, source });
-    return NextResponse.json({ success: true, id: saved._id }, { status: 201 });
+
+    // Send the same lead to the CRM (Admin → Integration). Fields without a CRM field go into `message`.
+    const crm = await sendLeadToCrm({
+      name: lead.name, email: lead.email, phone: lead.phone, message: lead.message,
+      source: source === 'Program application' ? 'website_program_application' : 'website_popup',
+      details: [
+        ['Enquiry type', source],
+        ['Program / Course', lead.program],
+        ['University', lead.university],
+        ['Destination', lead.destination],
+        ['Study level', lead.level],
+        ['Duration', lead.duration],
+        ['Tuition fee', lead.tuitionFee],
+        ['Intake', lead.intake],
+        ['Page', lead.page],
+      ],
+    });
+
+    return NextResponse.json({ success: true, id: saved._id, crm }, { status: 201 });
   } catch (err: unknown) {
     console.error('[POST /api/enquiry]', err instanceof Error ? err.message : err);
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });

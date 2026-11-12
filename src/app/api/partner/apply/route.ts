@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import { Partner } from '@/lib/models';
 import { sendPartnerApplicationMail } from '@/lib/mailer';
+import { sendLeadToCrm } from '@/lib/crm';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,9 +28,17 @@ export async function POST(req: NextRequest) {
     });
 
     // Email the application right away (saved to the admin panel above either way)
-    const emailed = await sendPartnerApplicationMail({ name, organization, email, phone, message });
+    // Email and CRM run together; neither can fail the submission
+    const [emailed, crm] = await Promise.all([
+      sendPartnerApplicationMail({ name, organization, email, phone, message }),
+      sendLeadToCrm({
+        name, email, phone, company: organization, message,
+        source: 'website_partner_application',
+        details: [['Enquiry type', 'Partner application']],
+      }),
+    ]);
 
-    return NextResponse.json({ success: true, id: partner._id, emailed }, { status: 201 });
+    return NextResponse.json({ success: true, id: partner._id, emailed, crm }, { status: 201 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[POST /api/partner/apply]', msg);
