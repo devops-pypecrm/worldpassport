@@ -135,6 +135,19 @@ const LeaderSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// One row per attempt to send a lead to the CRM (Admin → Integration → Delivery log). Kept 30 days.
+const CrmLogSchema = new Schema({
+  source: { type: String },
+  name: { type: String },
+  email: { type: String },
+  status: { type: String, enum: ['sent', 'failed'], required: true },
+  httpStatus: { type: Number },
+  error: { type: String },
+  crmId: { type: String },
+  durationMs: { type: Number },
+  createdAt: { type: Date, default: Date.now, expires: 60 * 60 * 24 * 30 },
+});
+
 // Third-party integration settings (one document per integration, e.g. name: 'crm')
 const IntegrationSchema = new Schema({
   name: { type: String, required: true, unique: true },
@@ -154,3 +167,4 @@ export const Lead           = mongoose.models.Lead           || mongoose.model('
 export const Destination    = mongoose.models.Destination    || mongoose.model('Destination',    DestinationSchema);
 export const Leader         = mongoose.models.Leader         || mongoose.model('Leader',         LeaderSchema);
 export const Integration    = mongoose.models.Integration    || mongoose.model('Integration',    IntegrationSchema);
+export const CrmLog         = mongoose.models.CrmLog         || mongoose.model('CrmLog',         CrmLogSchema);

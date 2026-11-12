@@ -7,12 +7,14 @@ import { useDestinations } from '@/lib/useDestinations';
 import { PROGRAM_LEVELS } from '@/lib/programs';
 
 const DELAY_MS = 10_000;               // open 10s after the page has fully loaded
-const SUBMITTED_KEY = 'wp_lead_submitted'; // once a visitor submits, don't interrupt them again
+// Older versions saved this flag to hide the popup forever after one submission; it is now cleared on load
+// so the popup opens on every page load / reload again.
+const SUBMITTED_KEY = 'wp_lead_submitted';
 
 const EMPTY = { name: '', email: '', phone: '', destination: '', level: '', message: '', website: '' };
 
-function alreadySubmitted() {
-  try { return localStorage.getItem(SUBMITTED_KEY) === '1'; } catch { return false; }
+function clearOldSubmittedFlag() {
+  try { localStorage.removeItem(SUBMITTED_KEY); } catch { /* storage unavailable: nothing to clear */ }
 }
 
 export default function LeadPopup() {
@@ -28,10 +30,10 @@ export default function LeadPopup() {
   const [error, setError] = useState('');
   const firstField = useRef<HTMLInputElement>(null);
 
-  // Timer: 10 seconds after the page has finished loading (once per page load / reload)
+  // Timer: 10 seconds after the page has finished loading, on every page load / reload
   useEffect(() => {
     if (hidden) return;
-    if (alreadySubmitted()) { setSubmitted(true); return; }
+    clearOldSubmittedFlag();
     let timer: ReturnType<typeof setTimeout>;
     const start = () => { timer = setTimeout(() => setOpen(true), DELAY_MS); };
     if (document.readyState === 'complete') start();
@@ -76,7 +78,6 @@ export default function LeadPopup() {
       setStatus('success');
       setForm({ ...EMPTY });
       setDismissed(false);
-      try { localStorage.setItem(SUBMITTED_KEY, '1'); } catch { /* private mode: ignore */ }
     } catch (err) {
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');

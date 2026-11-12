@@ -1,5 +1,5 @@
 import connectDB from '@/lib/mongodb';
-import { Integration } from '@/lib/models';
+import { Integration, CrmLog } from '@/lib/models';
 
 /**
  * Sends website leads to the CRM configured in Admin → Integration.
@@ -71,6 +71,15 @@ export function toCrmLead(input: LeadInput): CrmLead {
 
 export type CrmResult = 'sent' | 'not_configured' | 'failed';
 
+/** Records the outcome in the delivery log. Never throws. */
+async function logAttempt(input: LeadInput, entry: { status: 'sent' | 'failed'; httpStatus?: number; error?: string; crmId?: string; durationMs: number }) {
+  try {
+    await CrmLog.create({ source: input.source, name: input.name, email: input.email || '', ...entry });
+  } catch (err) {
+    console.error('[crm] Could not write delivery log:', err instanceof Error ? err.message : err);
+  }
+}
+
 /**
  * Posts one lead to the CRM. Never throws: a CRM problem must not stop the website form
  * from succeeding (the lead is already saved in the admin panel).
@@ -88,6 +97,7 @@ export async function sendLeadToCrm(input: LeadInput): Promise<CrmResult> {
   const lead = toCrmLead(input);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
+  const started = Date.now();
   try {
     const res = await fetch(config.endpoint, {
       method: 'POST',
@@ -102,14 +112,22 @@ export async function sendLeadToCrm(input: LeadInput): Promise<CrmResult> {
       signal: controller.signal,
       cache: 'no-store',
     });
+    const text = await res.text().catch(() => '');
     if (!res.ok) {
-      const text = await res.text().catch(() => '');
       console.error(`[crm] Lead rejected (${res.status}):`, text.slice(0, 300));
+      await logAttempt(input, { status: 'failed', httpStatus: res.status, error: text.slice(0, 500) || res.statusText, durationMs: Date.now() - started });
       return 'failed';
     }
+    let crmId = '';
+    try { crmId = String(JSON.parse(text)?.id ?? ''); } catch { /* non-JSON reply */ }
+    await logAttempt(input, { status: 'sent', httpStatus: res.status, crmId, durationMs: Date.now() - started });
     return 'sent';
   } catch (err) {
-    console.error('[crm] Could not reach the CRM:', err instanceof Error ? err.message : err);
+    const msg = err instanceof Error
+      ? (err.name === 'AbortError' ? 'Timed out after 8s waiting for the CRM' : `${err.message}${err.cause instanceof Error ? ` (${err.cause.message})` : ''}`)
+      : String(err);
+    console.error('[crm] Could not reach the CRM:', msg);
+    await logAttempt(input, { status: 'failed', error: msg.slice(0, 500), durationMs: Date.now() - started });
     return 'failed';
   } finally {
     clearTimeout(timer);
