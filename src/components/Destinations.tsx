@@ -1,6 +1,7 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Building2, Wallet, Landmark, MapPin, GraduationCap } from 'lucide-react';
+import { ChevronRight, ChevronDown, Building2, Wallet, Landmark, MapPin, GraduationCap } from 'lucide-react';
 import { useDestinations, countWord, universityLabel } from '@/lib/useDestinations';
 
 const collage = [
@@ -9,11 +10,17 @@ const collage = [
   { src: '/assets/page-bg-skill.jpg', alt: 'Graduates throwing their caps', icon: GraduationCap, cls: 'left-[46%] top-[52%] w-[44%] h-[46%]', badge: '-left-3 top-4' },
 ];
 
+// Cards shown before "Show more"
+const INITIAL_COUNT = 8;
+
 const tones = ['bg-pastel-pink', 'bg-pastel-peach', 'bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint'];
 
 export default function Destinations() {
   const { destinations, loading } = useDestinations();
   const count = countWord(destinations.length);
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? destinations : destinations.slice(0, INITIAL_COUNT);
+  const hiddenCount = destinations.length - INITIAL_COUNT;
   return (
     <section className="section bg-white">
       <div className="container-x">
@@ -49,9 +56,9 @@ export default function Destinations() {
           </div>
         </div>
 
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {loading && [0, 1, 2, 3, 4].map((i) => <div key={i} aria-hidden="true" className="h-60 animate-pulse rounded-2xl bg-cream" />)}
-          {destinations.map((d, i) => (
+        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {loading && [0, 1, 2, 3].map((i) => <div key={i} aria-hidden="true" className="h-60 animate-pulse rounded-2xl bg-cream" />)}
+          {visible.map((d, i) => (
             <Link key={d.id} href={`/overseas?search=${encodeURIComponent(d.name)}`}
               className={`group rounded-2xl ${tones[i % tones.length]} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lift`}>
               <div className="flex items-center justify-between">
@@ -70,6 +77,16 @@ export default function Destinations() {
             </Link>
           ))}
         </div>
+
+        {/* Show more / less when there are more than 8 destinations */}
+        {!loading && hiddenCount > 0 && (
+          <div className="mt-10 flex justify-center">
+            <button type="button" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll} className="btn-outline">
+              {showAll ? 'Show less' : `Show more (${hiddenCount})`}
+              <ChevronDown size={16} className={`transition-transform ${showAll ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );

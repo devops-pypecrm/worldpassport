@@ -4,7 +4,8 @@ import Stats from '@/components/Stats';
 import Destinations from '@/components/Destinations';
 import Features from '@/components/Features';
 import HowItWorks from '@/components/HowItWorks';
-import TopUniversities from '@/components/TopUniversities';
+// Hidden from the home page for now (component kept): "Accredited institutions we work with directly"
+// import TopUniversities from '@/components/TopUniversities';
 import Testimonials from '@/components/Testimonials';
 import CTASection from '@/components/CTASection';
 import Footer from '@/components/Footer';
@@ -19,7 +20,7 @@ export default function Home() {
       <Features />
       <Destinations />
       <HowItWorks />
-      <TopUniversities />
+      {/* <TopUniversities /> */}
       <Testimonials />
       <CTASection />
       <Footer />

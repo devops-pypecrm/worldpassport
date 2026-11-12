@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, CheckCircle2, Building2, Wallet, Users, BadgeCheck, Briefcase,
-  FileCheck, Award, Plane, Star, Zap, Landmark, UserRound,
+  FileCheck, Award, Plane, Star, Zap, Landmark, UserRound, ChevronRight,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -32,6 +32,11 @@ const timeline = [
   { month: 'Month 6–7', title: 'Visa & finance', desc: 'Student visa application, scholarship disbursement and tuition deposit.', icon: BadgeCheck },
   { month: 'Month 7–8', title: 'Fly & settle', desc: 'Pre-departure briefing, airport pick-up coordination and on-ground help.', icon: Plane },
 ];
+
+// Same slug rule as the university detail page (/university/[slug])
+const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+interface UniRow { _id: string; name: string; country: string; ranking?: string; city?: string }
 
 export default function OverseasPage() {
   return (
@@ -64,7 +69,32 @@ function OverseasContent() {
     setTimeout(() => document.getElementById('country-explorer')?.scrollIntoView({ behavior: 'smooth' }), 400);
   }, [search, destinations]);
 
+  // Universities created in admin → Universities, used to link partner universities to their detail page
+  const [universities, setUniversities] = useState<UniRow[]>([]);
+  useEffect(() => {
+    fetch('/api/admin/universities')
+      .then((r) => r.json())
+      .then((d) => setUniversities(Array.isArray(d.universities) ? d.universities : []))
+      .catch(() => setUniversities([]));
+  }, []);
+
   const active = destinations.find((c) => c.id === activeId);
+
+  // Partner universities for the selected country: the destination's own list,
+  // plus any university from the Universities table whose country matches
+  const partnerUnis = (() => {
+    if (!active) return [] as { name: string; rank: string; field: string; slug?: string }[];
+    const byName = new Map(universities.map((u) => [u.name.trim().toLowerCase(), u]));
+    const rows = active.topUnis.map((t) => {
+      const u = byName.get(t.name.trim().toLowerCase());
+      return { name: t.name, rank: t.rank || u?.ranking || '', field: t.field || u?.city || '', slug: u ? slugify(u.name) : undefined };
+    });
+    const listed = new Set(rows.map((r) => r.name.trim().toLowerCase()));
+    universities
+      .filter((u) => u.country?.trim().toLowerCase() === active.name.trim().toLowerCase() && !listed.has(u.name.trim().toLowerCase()))
+      .forEach((u) => rows.push({ name: u.name, rank: u.ranking || '', field: u.city || '', slug: slugify(u.name) }));
+    return rows;
+  })();
   const countryCount = loading ? 'Several' : countWord(destinations.length);
 
   return (
@@ -158,18 +188,39 @@ function OverseasContent() {
                   <Landmark size={18} className="text-gold" /> Partner universities
                 </h4>
                 <ul className="mt-5 space-y-2.5">
-                  {active.topUnis.map((u, i) => (
-                    <li key={u.name} className="flex items-center justify-between gap-3 rounded-xl border border-cream-200 bg-cream/60 px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-navy ring-1 ring-cream-200">{i + 1}</span>
-                        <div>
-                          <p className="text-sm font-semibold text-ink">{u.name}</p>
-                          <p className="text-xs text-ink-muted">{u.field}</p>
+                  {partnerUnis.map((u, i) => {
+                    const inner = (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-white text-xs font-bold text-navy ring-1 ring-cream-200">{i + 1}</span>
+                          <div>
+                            <p className="text-sm font-semibold text-ink">{u.name}</p>
+                            {u.field && <p className="text-xs text-ink-muted">{u.field}</p>}
+                          </div>
                         </div>
-                      </div>
-                      <span className="chip flex-shrink-0 bg-gold-50 text-gold-dark">{u.rank}</span>
-                    </li>
-                  ))}
+                        <span className="flex flex-shrink-0 items-center gap-2">
+                          {u.rank && <span className="chip bg-gold-50 text-gold-dark">{u.rank}</span>}
+                          {u.slug && <ChevronRight size={16} className="text-ink-soft transition-transform group-hover:translate-x-0.5 group-hover:text-brand" />}
+                        </span>
+                      </>
+                    );
+                    return (
+                      <li key={u.name}>
+                        {u.slug ? (
+                          // Opens the same detail page as the university cards ("View details")
+                          <Link href={`/university/${u.slug}`} title={`View details: ${u.name}`}
+                            className="group flex items-center justify-between gap-3 rounded-xl border border-cream-200 bg-cream/60 px-4 py-3 transition-colors hover:border-navy-100 hover:bg-white">
+                            {inner}
+                          </Link>
+                        ) : (
+                          <div className="flex items-center justify-between gap-3 rounded-xl border border-cream-200 bg-cream/60 px-4 py-3">{inner}</div>
+                        )}
+                      </li>
+                    );
+                  })}
+                  {partnerUnis.length === 0 && (
+                    <li className="rounded-xl border border-dashed border-cream-200 px-4 py-3 text-sm text-ink-muted">Partner universities for {active.name} are coming soon.</li>
+                  )}
                 </ul>
                 <div className="mt-5 flex items-center justify-between rounded-xl bg-navy-50 px-4 py-3 text-sm">
                   <span className="flex items-center gap-2 text-ink-muted"><Briefcase size={14} /> Avg. graduate salary</span>

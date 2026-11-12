@@ -5,13 +5,14 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
 import PageHero from '@/components/PageHero';
+import { KOCHI_OFFICE_ADDRESS, KOCHI_OFFICE_MAP_URL, KOCHI_OFFICE_MAP_EMBED } from '@/lib/office';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
 
 const contactItems = [
-  { icon: Mail, label: 'Email', value: 'rajithaworldpassport@gmail.com', href: 'mailto:rajithaworldpassport@gmail.com' },
-  { icon: Phone, label: 'Phone', value: '+91 92921 73857', href: 'tel:+919292173857' },
-  { icon: MapPin, label: 'Office', value: 'St George Forane Church Building, Palarivattam-Edappally Road, Ponekkara, Edappally, Kochi, Ernakulam, Kerala 682024' },
+  { icon: Mail, label: 'Email', value: 'admissions@worldpassport.in', href: 'mailto:admissions@worldpassport.in' },
+  { icon: Phone, label: 'Phone', value: '+91 6282 061 368', href: 'tel:+916282061368' },
+  { icon: MapPin, label: 'Office', value: KOCHI_OFFICE_ADDRESS, href: KOCHI_OFFICE_MAP_URL },
   { icon: Clock, label: 'Hours', value: 'Monday–Saturday, 9am–7pm IST' },
 ];
 
@@ -69,7 +70,8 @@ export default function ContactPage() {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft">{label}</p>
                     {href ? (
-                      <a href={href} className="text-sm font-medium text-ink hover:text-navy">{value}</a>
+                      <a href={href} className="text-sm font-medium text-ink hover:text-navy"
+                        {...(href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{value}</a>
                     ) : (
                       <p className="text-sm font-medium text-ink">{value}</p>
                     )}
@@ -77,6 +79,17 @@ export default function ContactPage() {
                 </li>
               ))}
             </ul>
+
+            {/* Office location */}
+            <div className="overflow-hidden rounded-2xl border border-cream-200 bg-white shadow-card">
+              <iframe title="World Passport office location, Edappally, Kochi" src={KOCHI_OFFICE_MAP_EMBED}
+                className="block h-56 w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+              <a href={KOCHI_OFFICE_MAP_URL} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-navy hover:bg-cream">
+                <span className="flex items-center gap-2"><MapPin size={15} className="text-brand" /> Get directions</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
 
             <div className="rounded-2xl border border-gold/30 bg-gold-50 p-6">
               <p className="flex items-center gap-2 font-display text-lg font-semibold text-navy-900">

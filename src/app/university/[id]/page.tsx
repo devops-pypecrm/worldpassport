@@ -11,6 +11,7 @@ import Footer from '@/components/Footer';
 import PageWrapper from '@/components/PageWrapper';
 import PageHero from '@/components/PageHero';
 import CTASection from '@/components/CTASection';
+import { useDestinations } from '@/lib/useDestinations';
 
 function slugify(text: string) {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -74,6 +75,8 @@ function Shell({ children }: { children: React.ReactNode }) {
 export default function UniversityDetailPage() {
   const { id } = useParams();
   const [uni, setUni] = useState<UniversityDetail | null | undefined>(undefined);
+  // Destinations (admin → Destinations) supply the "Popular programs" for the university's country
+  const { destinations } = useDestinations();
 
   useEffect(() => {
     fetch('/api/admin/universities')
@@ -107,7 +110,14 @@ export default function UniversityDetailPage() {
   );
 
   const location = uni.city ? `${uni.city}, ${uni.country}` : uni.country;
-  const programs = uni.programs ?? [];
+  // Programs offered = the "Popular programs" of this university's country (admin → Destinations),
+  // followed by any programs stored on the university itself (duplicates removed)
+  const destination = destinations.find((d) => d.name.trim().toLowerCase() === (uni.country || '').trim().toLowerCase());
+  const programs = Array.from(
+    new Map([...(destination?.programs ?? []), ...(uni.programs ?? [])]
+      .map((p) => p.trim()).filter(Boolean)
+      .map((p) => [p.toLowerCase(), p] as const)).values(),
+  );
   const highlights = uni.highlights ?? [];
   const stats = uni.stats ?? [];
 

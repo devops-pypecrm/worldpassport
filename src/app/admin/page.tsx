@@ -2,11 +2,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import EnquiriesPanel from '@/components/admin/EnquiriesPanel';
+import IntegrationPanel from '@/components/admin/IntegrationPanel';
 import {
   Plus, Trash2, Loader2, X, LayoutDashboard, GraduationCap,
   BookOpen, Mail, LogOut, ChevronRight, Globe, ExternalLink, Pencil,
   CheckCircle2, AlertCircle, Building2, Users, Award, Handshake, Check,
-  MapPin, GripVertical, ArrowUp, ArrowDown, Inbox,
+  MapPin, GripVertical, ArrowUp, ArrowDown, Inbox, Plug,
 } from 'lucide-react';
 
 type ToastType = 'success' | 'error';
@@ -50,7 +51,7 @@ interface DestinationEntry {
 }
 interface PartnerEntry { _id: string; name: string; organization: string; email: string; phone?: string; message?: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; }
 
-type Tab = 'dashboard' | 'enquiries' | 'destinations' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners';
+type Tab = 'dashboard' | 'enquiries' | 'destinations' | 'universities' | 'courses' | 'skill-unis' | 'skill-courses' | 'leaders' | 'contacts' | 'partners' | 'integration';
 
 const EMPTY_UNI = { name: '', country: '', city: '', website: '', ranking: '', image: '', description: '' };
 const EMPTY_COURSE = { title: '', university: '', country: '', level: "Master's", duration: '', tuitionFee: '', intake: '', description: '' };
@@ -167,6 +168,14 @@ export default function AdminDashboard() {
     } finally { setSaving(false); }
   }
 
+  // Destinations' partner-university lists change on the server when a university is saved/deleted,
+  // so re-read them to keep the Destinations tab (and its edit form) up to date
+  const refreshDestinations = () => {
+    fetch('/api/admin/destinations', { cache: 'no-store' }).then(r => r.json())
+      .then(d => { if (Array.isArray(d.destinations)) setDestinations(d.destinations); })
+      .catch(() => {});
+  };
+
   // University CRUD
   const saveUni = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,9 +190,10 @@ export default function AdminDashboard() {
         showToast('University added');
       }
       setModal(null); setEditingId(null); setUniForm({ ...EMPTY_UNI });
+      refreshDestinations();
     } catch (err) { showToast(err instanceof Error ? err.message : 'Error', 'error'); }
   };
-  const deleteUni = async (id: string) => { if (!confirm('Delete?')) return; try { await crudAction('/api/admin/universities', 'DELETE', null, id); setUniversities(p => p.filter(u => u._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
+  const deleteUni = async (id: string) => { if (!confirm('Delete?')) return; try { await crudAction('/api/admin/universities', 'DELETE', null, id); setUniversities(p => p.filter(u => u._id !== id)); refreshDestinations(); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
   const editUni = (u: UniversityEntry) => { setEditingId(u._id); setUniForm({ name: u.name, country: u.country, city: u.city || '', website: u.website || '', ranking: u.ranking || '', image: u.image || '', description: u.description || '' }); setModal('uni'); };
 
   // Course CRUD
@@ -360,6 +370,7 @@ export default function AdminDashboard() {
     { id: 'leaders', label: 'Leadership', icon: <Users size={18} /> },
     { id: 'partners', label: 'B2B Partners', icon: <Handshake size={18} /> },
     { id: 'contacts', label: 'Contact', icon: <Mail size={18} /> },
+    { id: 'integration', label: 'Integration', icon: <Plug size={18} /> },
   ];
 
   return (
@@ -433,6 +444,9 @@ export default function AdminDashboard() {
 
           {/* ENQUIRIES (all website leads) */}
           {activeTab === 'enquiries' && <EnquiriesPanel onError={(m) => showToast(m, 'error')} />}
+
+          {/* INTEGRATION (CRM settings, wired up later) */}
+          {activeTab === 'integration' && <IntegrationPanel onSaved={(m) => showToast(m)} onError={(m) => showToast(m, 'error')} />}
 
           {/* DESTINATIONS */}
           {activeTab === 'destinations' && (
@@ -728,7 +742,17 @@ export default function AdminDashboard() {
           <form onSubmit={saveUni} className="space-y-4">
             <div><label className={labelCls}>Name *</label><input required className={inputCls} value={uniForm.name} onChange={e => setUniForm(p => ({...p, name: e.target.value}))} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><label className={labelCls}>Country *</label><input required className={inputCls} value={uniForm.country} onChange={e => setUniForm(p => ({...p, country: e.target.value}))} /></div>
+              <div><label className={labelCls}>Country *</label>
+                {/* Countries come from admin → Destinations; the university is also listed under that destination's partner universities */}
+                <select required className={inputCls} value={uniForm.country} onChange={e => setUniForm(p => ({...p, country: e.target.value}))}>
+                  <option value="">Select country...</option>
+                  {destinations.map(d => <option key={d._id} value={d.name}>{d.name}</option>)}
+                  {/* Keep a saved country selectable even if it is not a destination */}
+                  {uniForm.country && !destinations.some(d => d.name === uniForm.country) && (
+                    <option value={uniForm.country}>{uniForm.country}</option>
+                  )}
+                </select>
+              </div>
               <div><label className={labelCls}>City</label><input className={inputCls} value={uniForm.city} onChange={e => setUniForm(p => ({...p, city: e.target.value}))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -807,9 +831,22 @@ export default function AdminDashboard() {
           <form onSubmit={saveSkillCourse} className="space-y-4">
             <div><label className={labelCls}>Course Title *</label><input required className={inputCls} placeholder="AI Video Creation" value={skillCourseForm.title} onChange={e => setSkillCourseForm(p => ({...p, title: e.target.value}))} /></div>
             <div><label className={labelCls}>University *</label>
-              <select required className={inputCls} value={skillCourseForm.universityId} onChange={e => { const su = skillUnis.find(u => u._id === e.target.value); setSkillCourseForm(p => ({...p, universityId: e.target.value, universityName: su?.name || ''})); }}>
+              <select required className={inputCls} value={skillCourseForm.universityId} onChange={e => { const su = universities.find(u => u._id === e.target.value) || skillUnis.find(u => u._id === e.target.value); setSkillCourseForm(p => ({...p, universityId: e.target.value, universityName: su?.name || ''})); }}>
                 <option value="">Select university...</option>
-                {skillUnis.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                {/* All universities from Overseas Universities */}
+                <optgroup label="Overseas Universities">
+                  {universities.map(u => <option key={u._id} value={u._id}>{u.name}{u.country ? ` (${u.country})` : ''}</option>)}
+                </optgroup>
+                {/* Skill universities kept so existing skill courses linked to them still show when edited */}
+                {skillUnis.length > 0 && (
+                  <optgroup label="Skill Universities">
+                    {skillUnis.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
+                  </optgroup>
+                )}
+                {/* Keep a saved value selectable even if its university was deleted */}
+                {skillCourseForm.universityId && !universities.some(u => u._id === skillCourseForm.universityId) && !skillUnis.some(u => u._id === skillCourseForm.universityId) && (
+                  <option value={skillCourseForm.universityId}>{skillCourseForm.universityName || 'Saved university'}</option>
+                )}
               </select>
             </div>
             <div className="grid grid-cols-3 gap-3">
@@ -845,7 +882,6 @@ export default function AdminDashboard() {
               <div><label className={labelCls}>Intl. students</label><input className={inputCls} placeholder="10k+" value={destForm.intl} onChange={e => setDestForm(p => ({...p, intl: e.target.value}))} /></div>
             </div>
             <div><label className={labelCls}>Avg. graduate salary</label><input className={inputCls} placeholder="€15,000+" value={destForm.salary} onChange={e => setDestForm(p => ({...p, salary: e.target.value}))} /></div>
-            <div><label className={labelCls}>Partner universities (one per line: Name | Rank | Field)</label><textarea rows={4} className={`${inputCls} resize-y`} placeholder={"Epoka University | Top Ranked | Engineering\nLuarasi University | Accredited | Law & Business"} value={destForm.topUnis} onChange={e => setDestForm(p => ({...p, topUnis: e.target.value}))} /></div>
             <div><label className={labelCls}>Why study here? (one per line)</label><textarea rows={3} className={`${inputCls} resize-y`} placeholder={"Affordable tuition & living costs\nEnglish-taught programs available"} value={destForm.highlights} onChange={e => setDestForm(p => ({...p, highlights: e.target.value}))} /></div>
             <div><label className={labelCls}>Popular programs (one per line)</label><textarea rows={3} className={`${inputCls} resize-y`} placeholder={"BSc Computer Science\nMBA"} value={destForm.programs} onChange={e => setDestForm(p => ({...p, programs: e.target.value}))} /></div>
             <div className="flex gap-3 pt-2">
