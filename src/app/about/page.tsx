@@ -64,7 +64,6 @@ const HIDDEN_LEADERS = ['edwin c benny'];
 interface Leader { _id?: string; name: string; role: string; bio?: string; image?: string }
 
 const fallbackLeaders: Leader[] = [
-  { name: 'Edwin C Benny', role: 'CEO', image: '/assets/team/edwin.jpeg', bio: "Visionary leader driving World Passport's mission to make international education accessible to every student." },
   { name: 'Mujeeb T', role: 'Director', image: '/assets/team/mujeeb-t.jpg', bio: "Guiding strategic direction and partnerships to expand World Passport's global education network." },
 ];
 

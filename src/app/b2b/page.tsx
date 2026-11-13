@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import {
   Handshake, Globe, Headset, FileCheck, BadgeCheck, ArrowRight, Send, Loader, CheckCircle2,
-  Wallet, LineChart, ClipboardCheck, UserPlus, GraduationCap, Users, TrendingUp,
+  Wallet, LineChart, ClipboardCheck, UserPlus, GraduationCap, Users, TrendingUp, Mail, Phone,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -181,6 +181,22 @@ export default function PartnerWithUsPage() {
                   Tell us a little about your organisation. Our partnerships team usually responds within
                   2 business days with next steps.
                 </p>
+              </div>
+              {/* Partnerships contact */}
+              <div className="relative mt-10 rounded-2xl border border-white/10 bg-white/5 p-5">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gold-light">Contact our partnerships team</p>
+                <ul className="space-y-3 text-sm">
+                  <li>
+                    <a href="mailto:partners@worldpassport.in" className="flex items-center gap-2.5 text-white/90 hover:text-white">
+                      <Mail size={16} className="flex-shrink-0 text-gold-light" /> partners@worldpassport.in
+                    </a>
+                  </li>
+                  <li>
+                    <a href="tel:+917428399668" className="flex items-center gap-2.5 text-white/90 hover:text-white">
+                      <Phone size={16} className="flex-shrink-0 text-gold-light" /> +91 7428 399 668
+                    </a>
+                  </li>
+                </ul>
               </div>
               <ul className="relative mt-10 space-y-3 text-sm text-white/85">
                 {['Free to apply, no setup fees', 'Dedicated partner manager', 'Transparent commission structure'].map((item) => (

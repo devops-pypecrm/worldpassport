@@ -31,7 +31,8 @@ export default function Footer() {
     columns[0],
     {
       title: 'Destinations',
-      links: destinations.map((d) => ({ label: d.name, href: `/overseas?search=${encodeURIComponent(d.name)}` })),
+      // Top 5 destinations, in the order arranged in Admin → Destinations
+      links: destinations.slice(0, 5).map((d) => ({ label: d.name, href: `/overseas?search=${encodeURIComponent(d.name)}` })),
     },
     ...columns.slice(1),
   ];
@@ -49,8 +50,8 @@ export default function Footer() {
               course to settling in on campus.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
-              <li><a href="tel:+919205031277" className="flex items-center gap-2.5 hover:text-white"><Phone size={14} className="text-gold-light" /> +91 92050 31277</a></li>
-              <li><a href="mailto:bm@worldpassport.in" className="flex items-center gap-2.5 hover:text-white"><Mail size={14} className="text-gold-light" /> bm@worldpassport.in</a></li>
+              <li><a href="tel:+916282061368" className="flex items-center gap-2.5 hover:text-white"><Phone size={14} className="text-gold-light" /> +91 6282 061 368</a></li>
+              <li><a href="mailto:admissions@worldpassport.in" className="flex items-center gap-2.5 hover:text-white"><Mail size={14} className="text-gold-light" /> admissions@worldpassport.in</a></li>
               <li className="flex items-start gap-2.5"><MapPin size={14} className="mt-0.5 text-gold-light flex-shrink-0" /> Offices in Noida, Kochi &amp; Dubai</li>
             </ul>
           </div>

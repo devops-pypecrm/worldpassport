@@ -252,7 +252,6 @@ const skillCourses = [
 ];
 
 const leaders = [
-  { name: 'Edwin C Benny', role: 'CEO', image: '/assets/team/edwin.jpeg', bio: 'Visionary leader driving World Passport\'s mission to make international education accessible to every student.', order: 0 },
   { name: 'Mujeeb T', role: 'Director', image: '/assets/team/mujeeb-t.jpg', bio: 'Guiding strategic direction and partnerships to expand World Passport\'s global education network.', order: 1 },
 ];
 

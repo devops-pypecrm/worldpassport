@@ -14,7 +14,7 @@ export default function Hero() {
   const [program, setProgram] = useState('');
   const [programs, setPrograms] = useState<Program[]>([]);
   const [programsLoading, setProgramsLoading] = useState(true);
-  const { destinations } = useDestinations();
+  const { destinations, loading: destinationsLoading } = useDestinations();
 
   // Programs come from the admin panel (Courses collection)
   useEffect(() => {
@@ -24,7 +24,8 @@ export default function Hero() {
       .finally(() => setProgramsLoading(false));
   }, []);
 
-  const programOptions = useMemo(() => uniqueValues(programs.map((p) => p.title)), [programs]);
+  // Program field: every "Popular programs" entry from all destinations (admin → Destinations), de-duplicated
+  const programOptions = useMemo(() => uniqueValues(destinations.flatMap((d) => d.programs || [])), [destinations]);
   const countryOptions = useMemo(
     () => uniqueValues([...destinations.map((d) => d.name), ...programs.map((p) => p.country)]),
     [destinations, programs],
@@ -57,10 +58,10 @@ export default function Hero() {
           <form onSubmit={handleSearch} className="mt-8 grid gap-2.5 rounded-2xl bg-white p-2.5 shadow-lift sm:grid-cols-[1fr_1fr_auto]">
             <label className="sr-only" htmlFor="hero-program">Program</label>
             <select id="hero-program" value={program} onChange={(e) => setProgram(e.target.value)}
-              disabled={programsLoading}
+              disabled={destinationsLoading}
               className="field !border-transparent !bg-cream sm:col-span-3">
               <option value="">
-                {programsLoading ? 'Loading programs…' : programOptions.length ? 'All programs' : 'All programs (none listed yet)'}
+                {destinationsLoading ? 'Loading programs…' : programOptions.length ? 'All programs' : 'All programs (none listed yet)'}
               </option>
               {programOptions.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>

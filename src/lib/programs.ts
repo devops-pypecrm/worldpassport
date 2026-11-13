@@ -25,7 +25,9 @@ const norm = (s: string | undefined) => (s || '').trim().toLowerCase();
 
 export function filterPrograms(programs: Program[], f: ProgramFilters) {
   return programs.filter((p) =>
-    (!f.program || norm(p.title) === norm(f.program)) &&
+    // Exact title, or a title containing the chosen program (e.g. "MBA" matches "MBA in Finance"),
+    // since the hero's program list comes from the destinations' "Popular programs"
+    (!f.program || norm(p.title) === norm(f.program) || norm(p.title).includes(norm(f.program))) &&
     (!f.country || norm(p.country) === norm(f.country)) &&
     (!f.level || norm(p.level) === norm(f.level)),
   );
