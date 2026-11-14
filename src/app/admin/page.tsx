@@ -357,6 +357,8 @@ export default function AdminDashboard() {
       showToast(status === 'approved' ? 'Partner approved' : status === 'rejected' ? 'Partner rejected' : 'Status updated');
     } catch (err) { showToast(err instanceof Error ? err.message : 'Error', 'error'); }
   };
+  // Contact submissions are stored as 'Contact form' enquiries; the enquiries API deletes them from that collection
+  const deleteContact = async (id: string) => { if (!confirm('Delete this contact submission?')) return; try { await crudAction(`/api/admin/enquiries?source=${encodeURIComponent('Contact form')}&id=${id}`, 'DELETE', null); setContacts(p => p.filter(x => x._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
   const deletePartner = async (id: string) => { if (!confirm('Delete this partner application?')) return; try { await crudAction('/api/admin/partners', 'DELETE', null, id); setPartners(p => p.filter(x => x._id !== id)); showToast('Deleted'); } catch { showToast('Failed', 'error'); } };
 
   const navItems: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -442,7 +444,7 @@ export default function AdminDashboard() {
           )}
 
           {/* ENQUIRIES (all website leads) */}
-          {activeTab === 'enquiries' && <EnquiriesPanel onError={(m) => showToast(m, 'error')} />}
+          {activeTab === 'enquiries' && <EnquiriesPanel onError={(m) => showToast(m, 'error')} onDeleted={(m) => { showToast(m); fetchAll(); }} />}
 
           {/* INTEGRATION (CRM settings, wired up later) */}
           {activeTab === 'integration' && <IntegrationPanel onSaved={(m) => showToast(m)} onError={(m) => showToast(m, 'error')} />}
@@ -712,7 +714,7 @@ export default function AdminDashboard() {
                 {loading ? <Spinner /> : contacts.length === 0 ? <Empty label="No messages yet" /> : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
-                      <thead><tr className="bg-gray-50">{['#','Name','Email','Phone','Subject','Message','Date'].map(h => <th key={h} className="px-5 py-3 text-xs font-bold text-gray-400 uppercase text-left">{h}</th>)}</tr></thead>
+                      <thead><tr className="bg-gray-50">{['#','Name','Email','Phone','Subject','Message','Date',''].map(h => <th key={h} className="px-5 py-3 text-xs font-bold text-gray-400 uppercase text-left">{h}</th>)}</tr></thead>
                       <tbody>
                         {contacts.map((c, i) => (
                           <tr key={c._id} className="border-t border-gray-50 hover:bg-violet-50/20">
@@ -723,6 +725,7 @@ export default function AdminDashboard() {
                             <td className="px-5 py-3 text-gray-500 max-w-[140px] truncate">{c.subject || '—'}</td>
                             <td className="px-5 py-3 text-gray-400 max-w-[200px] truncate">{c.message}</td>
                             <td className="px-5 py-3 text-gray-300 text-xs">{new Date(c.createdAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td>
+                            <td className="px-5 py-3"><button onClick={() => deleteContact(c._id)} title="Delete" className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={13} /></button></td>
                           </tr>
                         ))}
                       </tbody>

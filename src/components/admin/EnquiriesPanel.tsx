@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, Loader2, RefreshCw, Search, Inbox, ChevronDown } from 'lucide-react';
+import { Download, Loader2, RefreshCw, Search, Inbox, ChevronDown, Trash2 } from 'lucide-react';
 import type { Enquiry } from '@/lib/enquiries';
 
 const SOURCES = ['Program application', 'Website popup', 'Contact form', 'Partner application'];
@@ -28,7 +28,7 @@ function buildQuery(source: string, q: string) {
 const fmtDate = (d: string) =>
   d ? new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
 
-export default function EnquiriesPanel({ onError }: { onError?: (msg: string) => void }) {
+export default function EnquiriesPanel({ onError, onDeleted }: { onError?: (msg: string) => void; onDeleted?: (msg: string) => void }) {
   const [rows, setRows] = useState<Enquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState('');
@@ -36,6 +36,7 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
   const [query, setQuery] = useState(''); // debounced search
   const [expanded, setExpanded] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
   // Keep the latest error handler without re-running the data load when it changes
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
@@ -60,6 +61,25 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
   }, [source, query]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Deletes one lead from its own collection (popup / program application, contact form or partner application)
+  const remove = async (r: Enquiry) => {
+    if (!confirm(`Delete the enquiry from ${r.name || 'this lead'}? This cannot be undone.`)) return;
+    const key = `${r.source}-${r._id}`;
+    setDeleting(key);
+    try {
+      const qs = new URLSearchParams({ id: r._id, source: r.source });
+      const res = await fetch(`/api/admin/enquiries?${qs}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Could not delete the enquiry');
+      setRows((prev) => prev.filter((x) => `${x.source}-${x._id}` !== key));
+      onDeleted?.('Enquiry deleted');
+    } catch (err) {
+      onErrorRef.current?.(err instanceof Error ? err.message : 'Could not delete the enquiry');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   // Downloads the leads currently shown (same source + search filters)
   const download = async () => {
@@ -175,7 +195,14 @@ export default function EnquiriesPanel({ onError }: { onError?: (msg: string) =>
                           {r.status ? <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize ${statusStyle[r.status] || 'bg-gray-100 text-gray-600'}`}>{r.status}</span> : <span className="text-gray-300">—</span>}
                         </td>
                         <td className="px-2 py-3 text-gray-300">
-                          {r.message && <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />}
+                          <div className="flex items-center gap-1">
+                            {r.message && <ChevronDown size={14} className={`transition-transform ${open ? 'rotate-180' : ''}`} />}
+                            <button type="button" title="Delete" aria-label="Delete enquiry" disabled={deleting === `${r.source}-${r._id}`}
+                              onClick={(e) => { e.stopPropagation(); remove(r); }}
+                              className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 disabled:opacity-50">
+                              {deleting === `${r.source}-${r._id}` ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
